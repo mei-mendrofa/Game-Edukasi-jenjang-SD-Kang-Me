@@ -1,0 +1,2169 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Pixar Edition: Misteri Hilangnya Mahkota Kerajaan Majapahit - Kelas 5 SD</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --gold-glow: 0 0 25px rgba(245, 158, 11, 0.5);
+        }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: radial-gradient(circle at 50% 0%, #451a03 0%, #1c0a00 75%);
+            color: #451a03;
+            overflow-x: hidden;
+        }
+        h1, h2, h3, h4, .font-game {
+            font-family: 'Fredoka', sans-serif;
+            letter-spacing: 0.02em;
+        }
+        /* Pixar-style Glossy 3D Cards */
+        .pixar-card {
+            background: linear-gradient(180deg, #fffdf9 0%, #fef3c7 100%);
+            border: 4px solid #92400e;
+            box-shadow: 0 12px 0 #451a03, 0 20px 35px rgba(0,0,0,0.55), inset 0 3px 0 #ffffff;
+            position: relative;
+        }
+        .pixar-dark-card {
+            background: linear-gradient(180deg, #3b1704 0%, #1f0b01 100%);
+            border: 3px solid #d97706;
+            box-shadow: 0 10px 0 #0f0500, var(--gold-glow), inset 0 2px 0 rgba(255,255,255,0.2);
+        }
+        /* 3D Glossy Toy Buttons */
+        .btn-3d {
+            transition: all 0.16s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 6px 0 #451a03, 0 10px 18px rgba(0,0,0,0.3), inset 0 2px 0 rgba(255,255,255,0.45);
+        }
+        .btn-3d:hover:not(:disabled) {
+            transform: translateY(-3px) scale(1.01);
+            box-shadow: 0 9px 0 #451a03, 0 14px 22px rgba(0,0,0,0.35), inset 0 2px 0 rgba(255,255,255,0.6);
+        }
+        .btn-3d:active:not(:disabled) {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #451a03;
+        }
+        .btn-gold {
+            background: linear-gradient(180deg, #fde047 0%, #f59e0b 55%, #d97706 100%);
+            border: 3px solid #78350f;
+            color: #451a03;
+        }
+        .btn-emerald {
+            background: linear-gradient(180deg, #6ee7b7 0%, #10b981 55%, #059669 100%);
+            border: 3px solid #064e3b;
+            box-shadow: 0 6px 0 #064e3b, inset 0 2px 0 rgba(255,255,255,0.45);
+            color: #022c22;
+        }
+        .btn-emerald:hover:not(:disabled) {
+            box-shadow: 0 9px 0 #064e3b, inset 0 2px 0 rgba(255,255,255,0.6);
+        }
+        .btn-emerald:active:not(:disabled) {
+            box-shadow: 0 2px 0 #064e3b;
+        }
+        /* 3D Canvas Stage Container */
+        #pixar-stage-wrapper {
+            position: relative;
+            width: 100%;
+            height: 360px;
+            border-radius: 1.5rem;
+            overflow: hidden;
+            border: 4px solid #fbbf24;
+            box-shadow: 0 12px 0 #451a03, 0 20px 40px rgba(0,0,0,0.6);
+            background: linear-gradient(180deg, #38bdf8 0%, #fde68a 100%);
+            cursor: grab;
+        }
+        #pixar-stage-wrapper:active {
+            cursor: grabbing;
+        }
+        @media (min-width: 768px) {
+            #pixar-stage-wrapper {
+                height: 410px;
+            }
+        }
+        #three-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        /* Floating Speech Bubble in 3D Stage */
+        .pixar-bubble {
+            background: rgba(255, 255, 255, 0.94);
+            backdrop-filter: blur(8px);
+            border: 3px solid #b45309;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.35);
+            animation: float-slow 3.2s ease-in-out infinite;
+        }
+        @keyframes float-slow {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-6px); }
+        }
+        @keyframes pulse-ring {
+            0% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.8); }
+            70% { box-shadow: 0 0 0 14px rgba(251, 191, 36, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0); }
+        }
+        .pos-active-glow {
+            animation: pulse-ring 2s infinite;
+        }
+        #confetti-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 100;
+        }
+        @media print {
+            body { background: #fff !important; color: #000 !important; }
+            header, #game-view, .no-print { display: none !important; }
+            #teacher-view { display: block !important; }
+            .pixar-card { box-shadow: none !important; border: 2px solid #000 !important; background: #fff !important; }
+        }
+    </style>
+</head>
+<body class="min-h-screen pb-16 selection:bg-amber-400 selection:text-amber-950">
+
+    <!-- Confetti Overlay -->
+    <canvas id="confetti-canvas"></canvas>
+
+    <!-- ==================== TOP HUD NAVIGATION BAR ==================== -->
+    <header class="bg-gradient-to-b from-[#3b1704] via-[#271003] to-[#1a0901] text-amber-50 border-b-4 border-amber-500 sticky top-0 z-40 shadow-2xl">
+        <div class="max-w-6xl mx-auto px-4 py-2.5 flex flex-wrap justify-between items-center gap-3">
+            
+            <!-- Brand Title -->
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-yellow-300 via-amber-400 to-amber-600 border-2 border-white flex items-center justify-center text-3xl shadow-lg">
+                    👑
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="bg-gradient-to-r from-amber-400 to-orange-500 text-amber-950 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow">
+                            ✨ 3D Pixar Animation Edition
+                        </span>
+                        <span class="bg-amber-500/20 text-amber-300 border border-amber-400/40 text-[10px] font-bold px-2 py-0.5 rounded-full hidden sm:inline">
+                            Kelas 5 SD • Kurikulum Merdeka
+                        </span>
+                    </div>
+                    <h1 class="text-lg md:text-2xl font-bold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-amber-100 via-yellow-300 to-amber-400 leading-tight">
+                        Misteri Hilangnya Mahkota Majapahit
+                    </h1>
+                </div>
+            </div>
+
+            <!-- HUD Stats, Audio & Mode Switcher -->
+            <div class="flex flex-wrap items-center gap-2 md:gap-2.5">
+                
+                <!-- Lives & Score Pill -->
+                <div id="hud-stats" class="flex items-center gap-3 bg-black/50 px-3.5 py-1.5 rounded-2xl border-2 border-amber-600/80 shadow-inner">
+                    <div class="flex items-center gap-1" title="Energi Detektif">
+                        <span class="text-xs font-bold text-amber-300 uppercase mr-1 hidden sm:inline">Energi:</span>
+                        <span id="lives-display" class="text-base md:text-lg tracking-widest">❤️❤️❤️</span>
+                    </div>
+                    <div class="h-5 w-0.5 bg-amber-700"></div>
+                    <div class="flex items-center gap-1 font-game font-bold text-amber-300">
+                        <span class="text-lg">⭐</span>
+                        <span id="score-display" class="text-lg md:text-xl text-yellow-300">0</span>
+                        <span class="text-xs text-amber-400">XP</span>
+                    </div>
+                </div>
+
+                <!-- Sound Toggle Button -->
+                <button onclick="toggleSound()" id="sound-btn" title="Aktifkan/Matikan Efek Suara Game" class="bg-amber-900 hover:bg-amber-800 text-amber-200 p-2 rounded-2xl border-2 border-amber-500 btn-3d text-base">
+                    🔊
+                </button>
+
+                <!-- Teacher Guide Mode Button -->
+                <button onclick="toggleMode()" id="mode-btn" class="btn-emerald font-game font-bold px-3.5 py-2 rounded-2xl text-xs sm:text-sm btn-3d flex items-center gap-1.5">
+                    <span id="mode-icon">📋</span>
+                    <span id="mode-btn-text">Panduan & Kunci Guru</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ==================== MAIN CONTAINER ==================== -->
+    <main class="max-w-6xl mx-auto px-4 mt-5">
+
+        <!-- ==================== MODE 1: 3D PIXAR INTERACTIVE GAME VIEW ==================== -->
+        <div id="game-view" class="space-y-5">
+
+            <!-- ==================== 3D PIXAR ANIMATED WORLD STAGE ==================== -->
+            <div id="pixar-stage-wrapper">
+                <!-- Three.js WebGL Canvas -->
+                <canvas id="three-canvas"></canvas>
+
+                <!-- Top-Left Overlay: Current 3D Scene Location & Camera Controls -->
+                <div class="absolute top-3 left-3 right-3 flex flex-wrap justify-between items-start gap-2 pointer-events-none">
+                    <div class="bg-black/65 backdrop-blur-md text-amber-50 px-3.5 py-2 rounded-2xl border-2 border-amber-400/80 shadow-lg pointer-events-auto flex items-center gap-2.5">
+                        <span id="stage-pos-badge" class="bg-amber-400 text-amber-950 font-game font-bold text-xs px-2.5 py-1 rounded-xl shadow">
+                            POS 1 / 4
+                        </span>
+                        <div>
+                            <div id="stage-location-title" class="font-game font-bold text-sm sm:text-base text-yellow-300 leading-none">
+                                Bangsal Pusaka Keraton
+                            </div>
+                            <div class="text-[11px] text-amber-200 mt-0.5">
+                                🖱️ Geser layar untuk memutar kamera 3D • Scroll untuk Zoom
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Camera Quick Controls & Time of Day -->
+                    <div class="flex flex-wrap items-center gap-1.5 pointer-events-auto">
+                        <button onclick="triggerCharacterAction()" class="bg-amber-400 hover:bg-amber-300 text-amber-950 font-game font-bold text-xs px-3 py-2 rounded-xl border-2 border-amber-900 shadow-lg transition flex items-center gap-1">
+                            <span>🤸</span> <span>Aksi Karakter 3D</span>
+                        </button>
+                        <button onclick="toggleCharacterCloseup()" id="closeup-btn" class="bg-rose-600 hover:bg-rose-500 text-white font-game font-bold text-xs px-3 py-2 rounded-xl border-2 border-rose-950 shadow-lg transition flex items-center gap-1">
+                            <span>🔍</span> <span id="closeup-text">Zoom Karakter</span>
+                        </button>
+                        <button onclick="toggleDayNight()" id="lighting-btn" class="bg-indigo-950/90 hover:bg-indigo-900 text-amber-200 font-game font-bold text-xs px-3 py-2 rounded-xl border-2 border-amber-400/70 shadow-lg transition">
+                            🌅 Sore / 🌙 Malam
+                        </button>
+                        <button onclick="resetCameraView()" title="Reset Sudut Kamera" class="bg-black/70 hover:bg-black text-amber-200 font-bold text-xs px-2.5 py-2 rounded-xl border border-amber-400/60 shadow-lg">
+                            🎥 Reset
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Bottom Floating Pixar Character Dialogue Bubble -->
+                <div class="absolute bottom-3 left-3 right-3 flex flex-col sm:flex-row justify-between items-end sm:items-center gap-2 pointer-events-none">
+                    <div class="pixar-bubble px-4 py-2.5 rounded-2xl max-w-xl pointer-events-auto flex items-center gap-3">
+                        <div id="scene-avatar" class="w-11 h-11 rounded-xl bg-gradient-to-br from-amber-300 to-amber-500 border-2 border-amber-900 flex items-center justify-center text-2xl shrink-0 shadow">
+                            🛡️
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span id="speaker-name" class="text-xs font-extrabold uppercase tracking-wider text-amber-900">
+                                    Senopati Gajah Mada (3D)
+                                </span>
+                                <span id="pos-skill" class="text-[10px] font-extrabold bg-amber-900 text-amber-100 px-2 py-0.5 rounded-full">
+                                    🎯 Ide Pokok
+                                </span>
+                            </div>
+                            <p id="pos-character-quote" class="text-xs sm:text-sm font-bold text-amber-950 leading-snug mt-0.5">
+                                "Perhatikan kotak mahkota yang terbuka dan kain sutra ungu di jendela Bangsal Pusaka itu!"
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Pos Quick Switcher Pills inside 3D Viewport -->
+                    <div class="flex items-center gap-1.5 bg-black/65 backdrop-blur-md p-1.5 rounded-2xl border-2 border-amber-500/70 pointer-events-auto">
+                        <button onclick="jumpToPos(0)" id="cam-pos-0" class="px-2.5 py-1 rounded-xl font-game font-bold text-xs transition">Pos 1</button>
+                        <button onclick="jumpToPos(1)" id="cam-pos-1" class="px-2.5 py-1 rounded-xl font-game font-bold text-xs transition">Pos 2</button>
+                        <button onclick="jumpToPos(2)" id="cam-pos-2" class="px-2.5 py-1 rounded-xl font-game font-bold text-xs transition">Pos 3</button>
+                        <button onclick="jumpToPos(3)" id="cam-pos-3" class="px-2.5 py-1 rounded-xl font-game font-bold text-xs transition">Pos 4</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== MAP TRACKER + INVENTORY + GROUP SCORE ==================== -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                
+                <!-- Left (2 cols): Interactive 4-Pos Expedition Progress -->
+                <div class="lg:col-span-2 pixar-card rounded-3xl p-4 sm:p-5 flex flex-col justify-between">
+                    <div class="flex flex-wrap justify-between items-center gap-2 mb-2">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-extrabold uppercase tracking-wider bg-amber-900 text-amber-100 px-3 py-1 rounded-full border border-amber-600 shadow">
+                                🗺️ Peta 3D Ekspedisi Trowulan
+                            </span>
+                            <span class="text-xs font-bold text-amber-800 hidden sm:inline">
+                                Klik Pos untuk menerbangkan kamera 3D
+                            </span>
+                        </div>
+
+                        <!-- Timer Diskusi Kelompok 02:00 -->
+                        <button onclick="toggleTimer()" id="timer-btn" class="text-xs bg-gradient-to-r from-amber-800 to-amber-950 hover:from-amber-700 hover:to-amber-900 text-amber-100 px-3.5 py-1.5 rounded-xl font-bold flex items-center gap-1.5 border border-amber-500 shadow transition">
+                            <span>⏱️</span>
+                            <span id="timer-display">Timer Diskusi (02:00)</span>
+                        </button>
+                    </div>
+
+                    <!-- Map Nodes & Path -->
+                    <div class="relative flex justify-between items-center px-3 sm:px-8 py-3 my-auto">
+                        <div class="absolute left-10 right-10 top-1/2 -translate-y-1/2 h-3.5 bg-amber-950/20 border-2 border-amber-900/40 rounded-full z-0"></div>
+                        <div id="progress-bar" class="absolute left-10 top-1/2 -translate-y-1/2 h-3.5 bg-gradient-to-r from-emerald-500 to-teal-400 border-y-2 border-l-2 border-emerald-950 rounded-full z-0 transition-all duration-500" style="width: 0%;"></div>
+
+                        <!-- Node 1 -->
+                        <button onclick="jumpToPos(0)" id="node-0" class="relative z-10 flex flex-col items-center group focus:outline-none">
+                            <div class="node-box w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center text-xl sm:text-2xl transition-all duration-300">🏯</div>
+                            <span class="node-label mt-1 text-xs font-game font-bold px-2 py-0.5 rounded-lg shadow">Pos 1</span>
+                            <span class="text-[10px] font-bold text-amber-900 hidden sm:block">Bangsal Pusaka</span>
+                        </button>
+
+                        <!-- Node 2 -->
+                        <button onclick="jumpToPos(1)" id="node-1" class="relative z-10 flex flex-col items-center group focus:outline-none">
+                            <div class="node-box w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center text-xl sm:text-2xl transition-all duration-300">🏺</div>
+                            <span class="node-label mt-1 text-xs font-game font-bold px-2 py-0.5 rounded-lg shadow">Pos 2</span>
+                            <span class="text-[10px] font-bold text-amber-900 hidden sm:block">Pasar Bubat</span>
+                        </button>
+
+                        <!-- Node 3 -->
+                        <button onclick="jumpToPos(2)" id="node-2" class="relative z-10 flex flex-col items-center group focus:outline-none">
+                            <div class="node-box w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center text-xl sm:text-2xl transition-all duration-300">⚖️</div>
+                            <span class="node-label mt-1 text-xs font-game font-bold px-2 py-0.5 rounded-lg shadow">Pos 3</span>
+                            <span class="text-[10px] font-bold text-amber-900 hidden sm:block">Pendopo Agung</span>
+                        </button>
+
+                        <!-- Node 4 -->
+                        <button onclick="jumpToPos(3)" id="node-3" class="relative z-10 flex flex-col items-center group focus:outline-none">
+                            <div class="node-box w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center text-xl sm:text-2xl transition-all duration-300">👑</div>
+                            <span class="node-label mt-1 text-xs font-game font-bold px-2 py-0.5 rounded-lg shadow">Pos 4</span>
+                            <span class="text-[10px] font-bold text-amber-900 hidden sm:block">Singgasana Raja</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Right (1 col): Tas Barang Bukti 3D & Skor Kelompok -->
+                <div class="pixar-dark-card text-amber-50 rounded-3xl p-4 sm:p-5 flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-center mb-2.5">
+                            <span class="text-xs font-extrabold uppercase tracking-wider text-amber-300 flex items-center gap-1.5">
+                                🎒 Tas Bukti Detektif 3D
+                            </span>
+                            <span id="clue-counter" class="text-xs bg-amber-500/20 border border-amber-400/50 text-amber-200 px-2 py-0.5 rounded-full font-bold">
+                                0/4 Bukti
+                            </span>
+                        </div>
+
+                        <div class="grid grid-cols-4 gap-2 mb-3">
+                            <div id="artifact-0" class="bg-amber-950/80 border-2 border-amber-700/60 rounded-2xl p-2 flex flex-col items-center justify-center text-center opacity-40 transition-all">
+                                <span class="text-xl">🧣</span>
+                                <span class="text-[10px] font-bold text-amber-200 mt-0.5 leading-tight">Kain Ungu</span>
+                            </div>
+                            <div id="artifact-1" class="bg-amber-950/80 border-2 border-amber-700/60 rounded-2xl p-2 flex flex-col items-center justify-center text-center opacity-40 transition-all">
+                                <span class="text-xl">👣</span>
+                                <span class="text-[10px] font-bold text-amber-200 mt-0.5 leading-tight">Jejak Lumpur</span>
+                            </div>
+                            <div id="artifact-2" class="bg-amber-950/80 border-2 border-amber-700/60 rounded-2xl p-2 flex flex-col items-center justify-center text-center opacity-40 transition-all">
+                                <span class="text-xl">🧺</span>
+                                <span class="text-[10px] font-bold text-amber-200 mt-0.5 leading-tight">Keranjang</span>
+                            </div>
+                            <div id="artifact-3" class="bg-amber-950/80 border-2 border-amber-700/60 rounded-2xl p-2 flex flex-col items-center justify-center text-center opacity-40 transition-all">
+                                <span class="text-xl">👑</span>
+                                <span class="text-[10px] font-bold text-amber-200 mt-0.5 leading-tight">Mahkota</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Papan Skor Kelompok Proyektor -->
+                    <div class="border-t border-amber-800/80 pt-2.5">
+                        <div class="flex justify-between items-center mb-1.5">
+                            <span class="text-[11px] font-bold uppercase tracking-wider text-amber-300">
+                                🏆 Skor Kelompok (Klik +100)
+                            </span>
+                            <button onclick="resetTeams()" class="text-[10px] text-amber-400 hover:underline">Reset</button>
+                        </div>
+                        <div class="grid grid-cols-4 gap-1.5 text-center">
+                            <button onclick="addTeamScore(0)" class="bg-amber-900/70 hover:bg-amber-800 border border-amber-600 rounded-xl py-1 px-1 transition">
+                                <div class="text-[10px] text-amber-200 font-bold">Tim 1</div>
+                                <div id="team-score-0" class="text-sm font-game font-bold text-yellow-300">0</div>
+                            </button>
+                            <button onclick="addTeamScore(1)" class="bg-amber-900/70 hover:bg-amber-800 border border-amber-600 rounded-xl py-1 px-1 transition">
+                                <div class="text-[10px] text-amber-200 font-bold">Tim 2</div>
+                                <div id="team-score-1" class="text-sm font-game font-bold text-yellow-300">0</div>
+                            </button>
+                            <button onclick="addTeamScore(2)" class="bg-amber-900/70 hover:bg-amber-800 border border-amber-600 rounded-xl py-1 px-1 transition">
+                                <div class="text-[10px] text-amber-200 font-bold">Tim 3</div>
+                                <div id="team-score-2" class="text-sm font-game font-bold text-yellow-300">0</div>
+                            </button>
+                            <button onclick="addTeamScore(3)" class="bg-amber-900/70 hover:bg-amber-800 border border-amber-600 rounded-xl py-1 px-1 transition">
+                                <div class="text-[10px] text-amber-200 font-bold">Tim 4</div>
+                                <div id="team-score-3" class="text-sm font-game font-bold text-yellow-300">0</div>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== MAIN MISSION READING & QUIZ CARD ==================== -->
+            <div id="mission-card" class="pixar-card rounded-3xl overflow-hidden">
+                
+                <!-- Card Header Bar -->
+                <div class="bg-gradient-to-r from-amber-900 via-amber-800 to-amber-950 px-6 py-4 text-amber-50 border-b-4 border-amber-950 flex flex-wrap justify-between items-center gap-3">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span id="pos-badge" class="bg-amber-400 text-amber-950 font-game font-bold px-3 py-0.5 rounded-lg text-xs shadow">
+                                POS MISI 1 DARI 4
+                            </span>
+                            <span id="location-tag" class="text-xs font-bold text-amber-200 bg-black/30 px-2.5 py-0.5 rounded-lg border border-amber-500/40">
+                                📍 Lokasi 3D: Bangsal Pusaka Keraton
+                            </span>
+                        </div>
+                        <h2 id="pos-title" class="text-xl sm:text-2xl font-bold text-white mt-1">
+                            Geger di Bangsal Pusaka
+                        </h2>
+                    </div>
+
+                    <!-- Accessibility Tools: Read Aloud & Font Scaler -->
+                    <div class="flex items-center gap-2 bg-black/35 p-1.5 rounded-2xl border border-amber-500/40">
+                        <button onclick="speakNarrative()" id="tts-btn" class="bg-amber-400 hover:bg-amber-300 text-amber-950 font-game font-bold px-3 py-1.5 rounded-xl text-xs sm:text-sm flex items-center gap-1.5 shadow transition">
+                            <span id="tts-icon">🔊</span> <span id="tts-text">Bacakan Cerita</span>
+                        </button>
+                        <button onclick="changeFontSize(1)" title="Perbesar Teks untuk Proyektor" class="bg-amber-900/80 hover:bg-amber-800 text-amber-100 font-bold px-2.5 py-1.5 rounded-xl text-xs border border-amber-600">
+                            A+
+                        </button>
+                        <button onclick="changeFontSize(-1)" title="Perkecil Teks" class="bg-amber-900/80 hover:bg-amber-800 text-amber-100 font-bold px-2.5 py-1.5 rounded-xl text-xs border border-amber-600">
+                            A-
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Mission Content Body -->
+                <div class="p-5 sm:p-7">
+
+                    <!-- 1. Narasi Cerita (1 Paragraf Penuh) -->
+                    <div class="bg-[#fffdf5] border-2 border-amber-400 rounded-2xl p-5 sm:p-6 mb-6 shadow-inner">
+                        <div class="flex justify-between items-center mb-2.5 pb-2 border-b border-amber-200">
+                            <span class="text-xs font-extrabold text-amber-800 uppercase tracking-wider flex items-center gap-1.5">
+                                📜 1. Narasi Cerita (1 Paragraf Penuh - Baca dengan Saksama)
+                            </span>
+                            <span class="text-[11px] font-bold text-amber-700 hidden sm:inline">
+                                Kosakata Kelas 5 SD
+                            </span>
+                        </div>
+                        <div id="story-text" class="text-lg sm:text-xl leading-relaxed text-amber-950 font-medium text-justify transition-all">
+                            <!-- Injected by JS -->
+                        </div>
+                    </div>
+
+                    <!-- 2. Tantangan Misi (Pilihan Ganda A, B, C, D) -->
+                    <div>
+                        <div class="flex items-start gap-3.5 mb-5 bg-amber-200/60 p-4 rounded-2xl border-2 border-amber-400">
+                            <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-amber-500 to-amber-700 border-2 border-amber-950 text-white flex items-center justify-center text-2xl shrink-0 shadow-md">
+                                🔍
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex flex-wrap justify-between items-center gap-2">
+                                    <span class="text-xs font-extrabold uppercase tracking-wider text-amber-800">
+                                        2. Tantangan Misi Detektif Literasi:
+                                    </span>
+                                    <button onclick="showPreHint()" id="pre-hint-btn" class="text-xs font-bold bg-amber-100 hover:bg-amber-300 text-amber-900 border border-amber-600 px-3 py-1 rounded-full transition flex items-center gap-1">
+                                        💡 Butuh Petunjuk Membaca?
+                                    </button>
+                                </div>
+                                <h3 id="question-text" class="text-lg sm:text-xl font-bold text-amber-950 leading-snug mt-1">
+                                    <!-- Injected by JS -->
+                                </h3>
+                                <div id="pre-hint-box" class="hidden mt-2 text-xs sm:text-sm bg-yellow-100 border border-amber-500 text-amber-900 px-3.5 py-2 rounded-xl">
+                                    <!-- Injected by JS -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Options Grid A, B, C, D -->
+                        <div id="options-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- Injected by JS -->
+                        </div>
+                    </div>
+
+                    <!-- 3. Kunci Jawaban & Pembahasan Singkat Feedback Box -->
+                    <div id="feedback-box" class="hidden rounded-3xl p-6 border-4 mt-6 shadow-xl transition-all">
+                        <div class="flex flex-col sm:flex-row items-start gap-4">
+                            <div id="feedback-icon" class="w-16 h-16 rounded-2xl bg-white border-2 border-amber-900 flex items-center justify-center text-4xl shrink-0 shadow">
+                                🎉
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex flex-wrap items-center gap-2 mb-1">
+                                    <h4 id="feedback-title" class="font-game text-xl sm:text-2xl font-bold">
+                                        Jawaban Tepat!
+                                    </h4>
+                                    <span id="artifact-reward-badge" class="hidden text-xs font-extrabold bg-amber-400 text-amber-950 px-3 py-1 rounded-full border border-amber-900">
+                                        +100 XP & Bukti 3D Ditemukan!
+                                    </span>
+                                </div>
+                                <p id="feedback-explanation" class="text-sm sm:text-base leading-relaxed mb-5">
+                                    <!-- Pembahasan Singkat -->
+                                </p>
+                                <div class="flex flex-wrap gap-3">
+                                    <button id="next-btn" onclick="nextMission()" class="btn-gold font-game font-bold px-7 py-3 rounded-2xl text-base sm:text-lg btn-3d flex items-center gap-2">
+                                        <span>Terbang ke Pos Berikutnya</span> <span>➔</span>
+                                    </button>
+                                    <button id="retry-btn" onclick="retryQuestion()" class="hidden bg-white hover:bg-amber-100 text-amber-950 font-game font-bold px-6 py-2.5 rounded-2xl border-3 border-amber-900 btn-3d">
+                                        🔄 Baca Kembali & Coba Lagi
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- ==================== VICTORY SCREEN ==================== -->
+            <div id="victory-screen" class="hidden pixar-card rounded-3xl p-8 sm:p-10 text-center relative overflow-hidden">
+                <div class="inline-flex items-center justify-center w-24 h-24 rounded-3xl bg-gradient-to-br from-yellow-300 via-amber-400 to-amber-600 border-4 border-amber-900 text-5xl mb-4 shadow-2xl">
+                    👑
+                </div>
+                <div class="block">
+                    <span class="bg-emerald-600 text-white text-xs font-extrabold px-4 py-1 rounded-full uppercase tracking-widest shadow">
+                        Misi 3D Majapahit Selesai!
+                    </span>
+                </div>
+                <h2 class="text-3xl sm:text-4xl font-bold text-amber-950 mt-3 mb-2">
+                    Selamat, Detektif Literasi Muda Majapahit!
+                </h2>
+                <p class="text-base sm:text-lg text-amber-900 max-w-2xl mx-auto mb-6 leading-relaxed">
+                    Lihatlah di panggung 3D di atas! Mahkota Emas Kerajaan Majapahit telah kembali bersinar di Singgasana Agung berkat ketelitian kalian menemukan <strong>Ide Pokok</strong>, mengartikan <strong>Ungkapan</strong>, membedakan <strong>Fakta vs Opini</strong>, dan menarik <strong>Kesimpulan Akhir</strong>!
+                </p>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-2xl mx-auto mb-8">
+                    <div class="bg-amber-100 border-2 border-amber-500 rounded-2xl p-4 shadow">
+                        <div class="text-xs uppercase font-extrabold text-amber-700">Skor Akhir Detektif</div>
+                        <div id="final-score" class="text-3xl font-game font-bold text-amber-950 mt-1">400 XP</div>
+                    </div>
+                    <div class="bg-emerald-100 border-2 border-emerald-600 rounded-2xl p-4 shadow">
+                        <div class="text-xs uppercase font-extrabold text-emerald-800">Pangkat Literasi</div>
+                        <div class="text-xl font-game font-bold text-emerald-950 mt-1">📜 Senopati Pustaka</div>
+                    </div>
+                    <div class="bg-amber-100 border-2 border-amber-500 rounded-2xl p-4 shadow">
+                        <div class="text-xs uppercase font-extrabold text-amber-700">Barang Bukti 3D</div>
+                        <div class="text-2xl font-game font-bold text-amber-950 mt-1">🧣 👣 🧺 👑 (4/4)</div>
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap justify-center gap-4">
+                    <button onclick="resetGame()" class="btn-gold font-game font-bold px-8 py-3.5 rounded-2xl text-lg btn-3d">
+                        🔄 Mainkan Ulang dari Pos 1
+                    </button>
+                    <button onclick="toggleMode()" class="btn-emerald font-game font-bold px-7 py-3.5 rounded-2xl text-lg btn-3d">
+                        📖 Buka Kunci Jawaban & Panduan Guru
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ==================== MODE 2: TEACHER GUIDE & PRINTABLE LKPD ==================== -->
+        <div id="teacher-view" class="hidden space-y-6">
+            <div class="pixar-card rounded-3xl p-6 sm:p-8">
+                <div class="flex flex-wrap justify-between items-center gap-4 border-b-2 border-amber-400 pb-5 mb-6">
+                    <div>
+                        <span class="bg-emerald-700 text-white text-xs font-extrabold px-3 py-1 rounded-full uppercase tracking-wider">
+                            Pegangan Guru Kelas 5 SD • Kurikulum Merdeka
+                        </span>
+                        <h2 class="text-2xl sm:text-3xl font-bold text-amber-950 mt-1.5">
+                            Paket Lengkap Konten, Kunci Jawaban & Panduan Kelas
+                        </h2>
+                        <p class="text-sm text-amber-800">
+                            Tema: <strong>Misteri Hilangnya Mahkota Kerajaan Majapahit</strong> (4 Pos Misi Berkesinambungan)
+                        </p>
+                    </div>
+                    <div class="flex gap-2 no-print">
+                        <button onclick="window.print()" class="bg-amber-900 hover:bg-amber-800 text-amber-50 font-game font-bold px-5 py-2.5 rounded-2xl text-sm btn-3d flex items-center gap-2">
+                            🖨️ Cetak Lembar / PDF
+                        </button>
+                        <button onclick="toggleMode()" class="btn-gold font-game font-bold px-5 py-2.5 rounded-2xl text-sm btn-3d">
+                            🎮 Kembali ke Dunia 3D
+                        </button>
+                    </div>
+                </div>
+
+                <!-- All 4 Pos Content Rendered for Teacher -->
+                <div id="teacher-content-list" class="space-y-6">
+                    <!-- Injected by JS -->
+                </div>
+
+                <!-- Tips Penerapan di Kelas -->
+                <div class="mt-8 bg-emerald-50 border-4 border-emerald-800 rounded-3xl p-6 shadow-md">
+                    <h3 class="text-xl font-bold text-emerald-950 flex items-center gap-2 mb-4">
+                        <span>💡</span> Tips Penerapan di Kelas & Kustomisasi Tema
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-emerald-950 text-sm sm:text-base">
+                        <div class="bg-white p-4 rounded-2xl border border-emerald-300">
+                            <h4 class="font-bold text-emerald-900 mb-1">🖥️ 1. Mode Berkelompok (Layar Proyektor)</h4>
+                            <p class="leading-relaxed text-sm">
+                                Bagi kelas menjadi 4–5 kelompok. Tampilkan dunia 3D ini di layar depan kelas, lalu klik tombol <strong>"⏱️ Timer Diskusi (02:00)"</strong>. Minta tiap kelompok berdiskusi selama 2 menit untuk menebak jawaban setiap misi sebelum diketikkan/dipilih di layar. Gunakan <strong>Papan Skor Kelompok</strong> untuk mencatat poin setiap kelompok.
+                            </p>
+                        </div>
+                        <div class="bg-white p-4 rounded-2xl border border-emerald-300">
+                            <h4 class="font-bold text-emerald-900 mb-1">🎨 2. Kustomisasi Tema</h4>
+                            <p class="leading-relaxed text-sm">
+                                Anda dapat mengganti tema cerita (misalnya menjadi <strong>"Petualangan Luar Angkasa"</strong>, <strong>"Detektif Kantin Sekolah"</strong>, atau <strong>"Penjelajah Laut Dalam"</strong>) dengan mempertahankan struktur 4 Pos Misi (Ide Pokok, Kosakata/Ungkapan, Fakta vs Opini, dan Kesimpulan) agar sesuai dengan materi IPAS atau Bahasa Indonesia yang sedang diajarkan minggu ini.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // ==================== DATA LENGKAP 4 POS MISI ====================
+        const missions = [
+            {
+                pos: 1,
+                title: "Geger di Bangsal Pusaka",
+                stageTitle: "Pos 1: Bangsal Pusaka Keraton",
+                location: "📍 Lokasi 3D: Bangsal Pusaka Keraton",
+                speaker: "Senopati Gajah Mada (3D)",
+                avatar: "🛡️",
+                quote: "Perhatikan kotak mahkota yang terbuka dan kain sutra ungu di jendela Bangsal Pusaka itu!",
+                artifactName: "Kain Sutra Ungu",
+                artifactIcon: "🧣",
+                skill: "🎯 Pos 1: Ide Pokok & Kalimat Utama",
+                narrative: `<strong>Suasana pagi di Keraton Majapahit mendadak gempar karena Mahkota Emas Kerajaan hilang dari Bangsal Pusaka.</strong> Para prajurit penjaga segera memeriksa setiap sudut ruangan dengan wajah cemas karena mahkota itu akan digunakan dalam upacara agung esok hari. Di dekat kotak penyimpanan yang terbuka, Senopati Gajah Mada bersama dua murid cerdasnya, Arya dan Ratna, menemukan sehelai kain sutra berwarna ungu yang tersangkut di jendela kayu. Selain kain tersebut, tampak pula jejak kaki berlumpur yang mengarah keluar menuju lorong taman belakang istana.`,
+                plainNarrative: "Suasana pagi di Keraton Majapahit mendadak gempar karena Mahkota Emas Kerajaan hilang dari Bangsal Pusaka. Para prajurit penjaga segera memeriksa setiap sudut ruangan dengan wajah cemas karena mahkota itu akan digunakan dalam upacara agung esok hari. Di dekat kotak penyimpanan yang terbuka, Senopati Gajah Mada bersama dua murid cerdasnya, Arya dan Ratna, menemukan sehelai kain sutra berwarna ungu yang tersangkut di jendela kayu. Selain kain tersebut, tampak pula jejak kaki berlumpur yang mengarah keluar menuju lorong taman belakang istana.",
+                question: "Berdasarkan paragraf di Pos 1, apakah ide pokok atau kalimat utama dari narasi cerita tersebut?",
+                options: [
+                    { label: "A", text: "Para prajurit penjaga memeriksa setiap sudut ruangan dengan wajah cemas." },
+                    { label: "B", text: "Suasana Keraton Majapahit gempar karena Mahkota Emas Kerajaan hilang dari Bangsal Pusaka." },
+                    { label: "C", text: "Arya dan Ratna menemukan sehelai kain sutra berwarna ungu di jendela kayu." },
+                    { label: "D", text: "Jejak kaki berlumpur mengarah keluar menuju lorong taman belakang istana." }
+                ],
+                correct: "B",
+                hint: "Perhatikan kalimat pertama! Kalimat ke-2, ke-3, dan ke-4 semuanya merupakan kalimat penjelas yang menceritakan akibat dari peristiwa di kalimat pertama.",
+                explanation: "Paragraf di atas adalah <strong>paragraf deduktif</strong> yang meletakkan kalimat utamanya di awal paragraf. Ide pokoknya adalah <em>gemparnya Keraton Majapahit akibat hilangnya Mahkota Emas Kerajaan</em>, sedangkan kalimat-kalimat berikutnya (prajurit cemas, penemuan kain ungu, dan jejak lumpur) merupakan kalimat penjelas."
+            },
+            {
+                pos: 2,
+                title: "Jejak di Pasar Bubat",
+                stageTitle: "Pos 2: Keramaian Pasar Bubat",
+                location: "📍 Lokasi 3D: Kios Rempah Pasar Bubat",
+                speaker: "Ratna - Detektif Muda (3D)",
+                avatar: "🕵️‍♀️",
+                quote: "Lihat pedagang berjubah hitam di dekat keranjang rempah itu! Ayo pahami makna kata yang dicetak tebal!",
+                artifactName: "Jejak Sepatu Lumpur",
+                artifactIcon: "👣",
+                skill: "🎯 Pos 2: Makna Kata Sulit & Ungkapan",
+                narrative: `Berbekal petunjuk kain sutra ungu, Arya dan Ratna menyusuri jejak berlumpur yang membawa mereka hingga ke keramaian Pasar Bubat. Mereka mengamati setiap pedagang dengan cermat agar pelaku yang <strong class="bg-amber-200 px-1.5 py-0.5 rounded border border-amber-500">panjang tangan</strong> itu tidak sempat melarikan diri keluar kota. Tiba-tiba, Ratna melihat seorang pria berjubah hitam yang tampak <strong class="bg-amber-200 px-1.5 py-0.5 rounded border border-amber-500">gelisah</strong> sambil menyembunyikan bungkusan berkilau di balik keranjang rempah-rempahnya. Tanpa membuang waktu, Arya memberi isyarat kepada prajurit keraton untuk mengepung kios tersebut secara diam-diam.`,
+                plainNarrative: "Berbekal petunjuk kain sutra ungu, Arya dan Ratna menyusuri jejak berlumpur yang membawa mereka hingga ke keramaian Pasar Bubat. Mereka mengamati setiap pedagang dengan cermat agar pelaku yang panjang tangan itu tidak sempat melarikan diri keluar kota. Tiba-tiba, Ratna melihat seorang pria berjubah hitam yang tampak gelisah sambil menyembunyikan bungkusan berkilau di balik keranjang rempah-rempahnya. Tanpa membuang waktu, Arya memberi isyarat kepada prajurit keraton untuk mengepung kios tersebut secara diam-diam.",
+                question: "Apakah makna ungkapan 'panjang tangan' dan kata 'gelisah' yang dicetak tebal pada narasi Pos 2?",
+                options: [
+                    { label: "A", text: "Panjang tangan = suka menolong; Gelisah = merasa sangat gembira." },
+                    { label: "B", text: "Panjang tangan = suka mencuri; Gelisah = tidak tenang atau khawatir di dalam hati." },
+                    { label: "C", text: "Panjang tangan = memiliki tangan yang panjang; Gelisah = merasa mengantuk berat." },
+                    { label: "D", text: "Panjang tangan = rajin bekerja; Gelisah = berani menghadapi bahaya." }
+                ],
+                correct: "B",
+                hint: "Ingat konteks kalimatnya: pelaku tersebut mengambil mahkota tanpa izin (mencuri), lalu merasa takut ketahuan saat menyembunyikan bungkusan berkilau.",
+                explanation: "Dalam Bahasa Indonesia, ungkapan (idiom) <strong>'panjang tangan'</strong> bermakna kiasan suka mencuri atau mengambil barang milik orang lain. Sementara kata <strong>'gelisah'</strong> berarti perasaan tidak tenteram, cemas, atau khawatir karena takut perbuatannya terbongkar."
+            },
+            {
+                pos: 3,
+                title: "Interogasi di Pendopo Agung",
+                stageTitle: "Pos 3: Pendopo Agung Majapahit",
+                location: "📍 Lokasi 3D: Pendopo Agung Keraton",
+                speaker: "Arya - Detektif Muda (3D)",
+                avatar: "⚖️",
+                quote: "Ki Sura sedang diperiksa di Pendopo! Pisahkan mana bukti nyata (Fakta) dan mana tebakan (Opini)!",
+                artifactName: "Keranjang Lada Bukti",
+                artifactIcon: "🧺",
+                skill: "🎯 Pos 3: Membedakan Fakta dan Opini",
+                narrative: `Pria berjubah hitam yang bernama Ki Sura akhirnya dibawa ke Pendopo Agung untuk diperiksa oleh Senopati Gajah Mada. Di hadapan para saksi, empat tokoh menyampaikan pernyataan yang berbeda:<br><br>
+                <span class="inline-block bg-amber-100 border border-amber-300 rounded-lg px-2.5 py-1 mb-1.5"><strong>(1) Prajurit Jaga:</strong> "Kami menemukan bungkusan berisi Mahkota Emas Majapahit di dalam keranjang lada milik Ki Sura pada pukul sembilan pagi."</span><br>
+                <span class="inline-block bg-amber-100 border border-amber-300 rounded-lg px-2.5 py-1 mb-1.5"><strong>(2) Pedagang Kain:</strong> "Menurutku, Ki Sura pasti dihasut oleh saudagar asing karena wajahnya terlihat sangat ketakutan."</span><br>
+                <span class="inline-block bg-amber-100 border border-amber-300 rounded-lg px-2.5 py-1 mb-1.5"><strong>(3) Ratna:</strong> "Sepatu kayu yang dipakai Ki Sura memiliki ukuran dan sisa lumpur merah yang sama persis dengan jejak di taman keraton."</span><br>
+                <span class="inline-block bg-amber-100 border border-amber-300 rounded-lg px-2.5 py-1"><strong>(4) Warga Pasar:</strong> "Sepertinya pencurian ini adalah kejadian paling mengerikan sepanjang sejarah kerajaan kita."</span>`,
+                plainNarrative: "Pria berjubah hitam yang bernama Ki Sura akhirnya dibawa ke Pendopo Agung untuk diperiksa oleh Senopati Gajah Mada. Di hadapan para saksi, empat tokoh menyampaikan pernyataan yang berbeda. Pernyataan 1 Prajurit Jaga: Kami menemukan bungkusan berisi Mahkota Emas Majapahit di dalam keranjang lada milik Ki Sura pada pukul sembilan pagi. Pernyataan 2 Pedagang Kain: Menurutku, Ki Sura pasti dihasut oleh saudagar asing karena wajahnya terlihat sangat ketakutan. Pernyataan 3 Ratna: Sepatu kayu yang dipakai Ki Sura memiliki ukuran dan sisa lumpur merah yang sama persis dengan jejak di taman keraton. Pernyataan 4 Warga Pasar: Sepertinya pencurian ini adalah kejadian paling mengerikan sepanjang sejarah kerajaan kita.",
+                question: "Manakah pasangan pernyataan tokoh di atas yang merupakan kalimat FAKTA?",
+                options: [
+                    { label: "A", text: "Pernyataan (1) Prajurit Jaga dan (2) Pedagang Kain" },
+                    { label: "B", text: "Pernyataan (2) Pedagang Kain dan (4) Warga Pasar" },
+                    { label: "C", text: "Pernyataan (1) Prajurit Jaga dan (3) Ratna" },
+                    { label: "D", text: "Pernyataan (3) Ratna dan (4) Warga Pasar" }
+                ],
+                correct: "C",
+                hint: "Kalimat fakta berisi bukti nyata yang dapat dilihat dan diukur kebenarannya (waktu, barang bukti, kecocokan ukuran), bukan perkiraan yang diawali kata 'menurutku' atau 'sepertinya'.",
+                explanation: "<strong>Kalimat Fakta</strong> adalah peristiwa yang benar-benar terjadi dan terbukti kebenarannya. Pernyataan <strong>(1)</strong> menyebutkan barang bukti serta waktu yang jelas (pukul sembilan pagi), dan pernyataan <strong>(3)</strong> membuktikan kecocokan ukuran sepatu serta lumpur. Sedangkan pernyataan (2) dan (4) menggunakan kata <em>'menurutku'</em> dan <em>'sepertinya'</em> yang merupakan pendapat pribadi (<strong>Opini</strong>)."
+            },
+            {
+                pos: 4,
+                title: "Kembalinya Sang Mahkota",
+                stageTitle: "Pos 4: Singgasana Agung Raja",
+                location: "📍 Lokasi 3D: Candi Bentar & Singgasana",
+                speaker: "Prabu Hayam Wuruk & Gajah Mada (3D)",
+                avatar: "👑",
+                quote: "Mahkota Emas telah kembali bersinar! Ambillah kesimpulan dan pesan moral dari kisah ini!",
+                artifactName: "Mahkota Emas Majapahit",
+                artifactIcon: "👑",
+                skill: "🎯 Pos 4: Kesimpulan Akhir & Pesan Moral",
+                narrative: `Setelah bukti-bukti nyata ditunjukkan, Ki Sura akhirnya tertunduk malu dan mengakui kesalahannya di hadapan Raja dan Senopati Gajah Mada. Ia mengaku nekat mengambil mahkota tersebut hanya karena tergiur janji imbalan sekantong koin emas dari seorang pengacau, tanpa memikirkan akibat buruk bagi ketenteraman negeri. Karena Ki Sura bersedia jujur dan mahkota belum sempat rusak, kerajaan memberinya hukuman memperbaiki saluran air desa selama tiga bulan agar ia belajar bertanggung jawab. Mahkota Emas pun kembali ke Bangsal Pusaka tepat waktu berkat kerja sama, ketelitian membaca petunjuk, dan kejujuran dalam menyelesaikan masalah.`,
+                plainNarrative: "Setelah bukti-bukti nyata ditunjukkan, Ki Sura akhirnya tertunduk malu dan mengakui kesalahannya di hadapan Raja dan Senopati Gajah Mada. Ia mengaku nekat mengambil mahkota tersebut hanya karena tergiur janji imbalan sekantong koin emas dari seorang pengacau, tanpa memikirkan akibat buruk bagi ketenteraman negeri. Karena Ki Sura bersedia jujur dan mahkota belum sempat rusak, kerajaan memberinya hukuman memperbaiki saluran air desa selama tiga bulan agar ia belajar bertanggung jawab. Mahkota Emas pun kembali ke Bangsal Pusaka tepat waktu berkat kerja sama, ketelitian membaca petunjuk, dan kejujuran dalam menyelesaikan masalah.",
+                question: "Apakah kesimpulan akhir dan pesan moral (amanat) yang paling tepat dari keseluruhan cerita tersebut?",
+                options: [
+                    { label: "A", text: "Kita tidak boleh pergi ke Pasar Bubat sendirian karena banyak pedagang berjubah hitam." },
+                    { label: "B", text: "Keserakahan hanya membawa penyesalan, sedangkan ketelitian, kerja sama, dan kejujuran dapat menyelesaikan masalah dengan baik." },
+                    { label: "C", text: "Setiap pelanggar aturan kerajaan harus diberi hadiah koin emas agar mau berkata jujur." },
+                    { label: "D", text: "Menjadi detektif kerajaan sangat mudah dilakukan asalkan kita memiliki pakaian sutra berwarna ungu." }
+                ],
+                correct: "B",
+                hint: "Perhatikan mengapa Ki Sura menyesal (tergiur emas) dan bagaimana Arya, Ratna, serta prajurit berhasil mengembalikan mahkota (kerja sama, ketelitian, dan kejujuran).",
+                explanation: "Dari Pos 1 hingga Pos 4, kita dapat menyimpulkan bahwa sifat serakah (tergiur imbalan emas dengan cara mencuri) akhirnya terbongkar dan berujung penyesalan. Sebaliknya, <strong>ketelitian mengamati petunjuk, kerja sama tim, dan keberanian mengakui kesalahan (jujur)</strong> adalah kunci utama menyelesaikan persoalan."
+            }
+        ];
+
+        // ==================== STATE PERMAINAN ====================
+        let currentPos = 0;
+        let score = 0;
+        let lives = 3;
+        let completedPos = [false, false, false, false];
+        let teamScores = [0, 0, 0, 0];
+        let isTeacherMode = false;
+        let soundEnabled = true;
+        let fontScale = 0;
+        let timerInterval = null;
+        let timeLeft = 120;
+
+        // ==================== THREE.JS PIXAR 3D ENGINE ====================
+        let scene, camera, renderer, dirLight, hemiLight;
+        let characters3D = [];
+        let floatingCrown3D = null;
+        let purpleCloth3D = null;
+        let clouds3D = [];
+        let sparkles3D = null;
+        let isNightMode = false;
+        let jumpCelebrationTimer = 0;
+
+        // Camera smooth interpolation targets for each of the 4 Pos Missions
+        const posCameraTargets = [
+            { camPos: new THREE.Vector3(-18, 6.8, 12.5), lookAt: new THREE.Vector3(-18, 2.3, 0) }, // Pos 1: Bangsal Pusaka
+            { camPos: new THREE.Vector3(-6, 6.5, 13.0),  lookAt: new THREE.Vector3(-6, 2.1, 0) },  // Pos 2: Pasar Bubat
+            { camPos: new THREE.Vector3(6, 6.8, 12.8),   lookAt: new THREE.Vector3(6, 2.3, 0) },   // Pos 3: Pendopo Agung
+            { camPos: new THREE.Vector3(18, 7.2, 13.5),  lookAt: new THREE.Vector3(18, 2.8, 0) }   // Pos 4: Singgasana Raja
+        ];
+
+        let currentCamPos = new THREE.Vector3(-18, 6.8, 12.5);
+        let currentLookAt = new THREE.Vector3(-18, 2.3, 0);
+        let userOrbitAngleX = 0;
+        let userOrbitAngleY = 0;
+        let userZoomOffset = 0;
+        let isCharacterCloseup = false;
+        let isDragging3D = false;
+        let prevPointer = { x: 0, y: 0 };
+        const raycaster = new THREE.Raycaster();
+        const mouseVec = new THREE.Vector2();
+
+        function initPixar3DWorld() {
+            const container = document.getElementById('pixar-stage-wrapper');
+            const canvas = document.getElementById('three-canvas');
+
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x7dd3fc);
+            scene.fog = new THREE.FogExp2(0xfde68a, 0.012);
+
+            camera = new THREE.PerspectiveCamera(42, container.clientWidth / container.clientHeight, 0.1, 200);
+            camera.position.copy(currentCamPos);
+
+            renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, powerPreference: "high-performance" });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            renderer.outputEncoding = THREE.sRGBEncoding;
+
+            // Pixar Warm Cinematic Lighting
+            hemiLight = new THREE.HemisphereLight(0xfffbeb, 0x92400e, 0.85);
+            hemiLight.position.set(0, 40, 0);
+            scene.add(hemiLight);
+
+            dirLight = new THREE.DirectionalLight(0xffedd5, 1.25);
+            dirLight.position.set(22, 35, 25);
+            dirLight.castShadow = true;
+            dirLight.shadow.mapSize.width = 2048;
+            dirLight.shadow.mapSize.height = 2048;
+            dirLight.shadow.camera.near = 0.5;
+            dirLight.shadow.camera.far = 110;
+            const d = 32;
+            dirLight.shadow.camera.left = -d;
+            dirLight.shadow.camera.right = d;
+            dirLight.shadow.camera.top = d;
+            dirLight.shadow.camera.bottom = -d;
+            dirLight.shadow.bias = -0.0005;
+            scene.add(dirLight);
+
+            // Build Ground & Trowulan Cobblestone Road
+            buildPixarEnvironment();
+
+            // Build 4 Distinct Majapahit Mission Dioramas
+            buildPos1Bangsal(-18, 0);
+            buildPos2Pasar(-6, 0);
+            buildPos3Pendopo(6, 0);
+            buildPos4Singgasana(18, 0);
+
+            // Build Floating Golden Sparkles
+            buildMagicSparkles();
+
+            // Mouse & Touch Orbit Controls
+            setupStageInteractions(container);
+
+            window.addEventListener('resize', onResize3D);
+        }
+
+        function pixarMat(colorHex, roughness = 0.38, metalness = 0.05, emissiveHex = 0x000000) {
+            return new THREE.MeshStandardMaterial({
+                color: colorHex,
+                roughness: roughness,
+                metalness: metalness,
+                emissive: emissiveHex
+            });
+        }
+
+        function buildPixarEnvironment() {
+            // Stylized Lush Green Island Base
+            const groundGeo = new THREE.CylinderGeometry(42, 40, 3, 48);
+            const groundMesh = new THREE.Mesh(groundGeo, pixarMat(0x65a30d, 0.65));
+            groundMesh.position.set(0, -1.5, 0);
+            groundMesh.receiveShadow = true;
+            scene.add(groundMesh);
+
+            // Terracotta Royal Path connecting Pos 1 to Pos 4
+            const roadGeo = new THREE.BoxGeometry(44, 0.22, 5.2);
+            const roadMesh = new THREE.Mesh(roadGeo, pixarMat(0xd97706, 0.55));
+            roadMesh.position.set(0, 0.1, 2.2);
+            roadMesh.receiveShadow = true;
+            scene.add(roadMesh);
+
+            // Decorative Stepping Stones
+            for (let x = -20; x <= 20; x += 2.2) {
+                const stone = new THREE.Mesh(
+                    new THREE.CylinderGeometry(0.65, 0.7, 0.26, 8),
+                    pixarMat(0xfde68a, 0.5)
+                );
+                stone.position.set(x, 0.12, 2.2 + (Math.sin(x) * 0.4));
+                stone.receiveShadow = true;
+                scene.add(stone);
+            }
+
+            // Pixar Puffy Trees in Background
+            const treePositions = [
+                [-24, -4], [-13, -5.5], [-1, -5], [12, -5.5], [24, -4],
+                [-22, 5.5], [0, 6.2], [23, 5.5]
+            ];
+            treePositions.forEach(([tx, tz], idx) => {
+                createPixarTree(tx, tz, 0.85 + (idx % 3) * 0.2);
+            });
+
+            // Soft Puffy 3D Clouds
+            for (let i = 0; i < 7; i++) {
+                const cloudGroup = new THREE.Group();
+                const cloudMat = pixarMat(0xffffff, 0.85);
+                for (let j = 0; j < 3; j++) {
+                    const puff = new THREE.Mesh(new THREE.SphereGeometry(1.3 - j * 0.25, 16, 16), cloudMat);
+                    puff.position.set(j * 1.1 - 1.1, (j % 2) * 0.3, 0);
+                    cloudGroup.add(puff);
+                }
+                cloudGroup.position.set(-25 + i * 9, 10 + (i % 2) * 2, -10 - (i % 3) * 2);
+                scene.add(cloudGroup);
+                clouds3D.push(cloudGroup);
+            }
+        }
+
+        function createPixarTree(x, z, scale = 1) {
+            const tree = new THREE.Group();
+            const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.5, 2.4, 12), pixarMat(0x78350f, 0.6));
+            trunk.position.y = 1.2;
+            trunk.castShadow = true;
+            tree.add(trunk);
+
+            const foliageColors = [0x4d7c0f, 0x65a30d, 0x84cc16];
+            foliageColors.forEach((col, i) => {
+                const crown = new THREE.Mesh(new THREE.SphereGeometry(1.45 - i * 0.28, 18, 18), pixarMat(col, 0.45));
+                crown.position.set((i - 1) * 0.35, 2.6 + i * 0.75, 0);
+                crown.castShadow = true;
+                tree.add(crown);
+            });
+
+            tree.position.set(x, 0, z);
+            tree.scale.setScalar(scale);
+            scene.add(tree);
+        }
+
+        // ==================== UPGRADED HERO PIXAR CHARACTER BUILDER ====================
+        function createPixarCharacter(config) {
+            const group = new THREE.Group();
+
+            // 1. Ground Hero Aura Ring (Glowing platform under each character)
+            const auraColor = config.auraColor || 0xfbbf24;
+            const auraRing = new THREE.Mesh(
+                new THREE.RingGeometry(0.65, 0.88, 32),
+                new THREE.MeshBasicMaterial({ color: auraColor, side: THREE.DoubleSide, transparent: true, opacity: 0.65 })
+            );
+            auraRing.rotation.x = -Math.PI / 2;
+            auraRing.position.y = 0.04;
+            group.add(auraRing);
+
+            // 2. Boots & Articulated Legs
+            const leftLegGroup = new THREE.Group();
+            leftLegGroup.position.set(-0.26, 0.45, 0);
+            const rightLegGroup = new THREE.Group();
+            rightLegGroup.position.set(0.26, 0.45, 0);
+
+            const legMat = pixarMat(0x451a03, 0.5);
+            const bootGoldMat = pixarMat(0xfbbf24, 0.25, 0.6);
+
+            [leftLegGroup, rightLegGroup].forEach(legG => {
+                const shin = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.14, 0.48, 14), legMat);
+                shin.position.y = -0.1;
+                shin.castShadow = true;
+
+                const boot = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.24, 0.46), legMat);
+                boot.position.set(0, -0.32, 0.06);
+                boot.castShadow = true;
+
+                const bootTrim = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.08, 0.48), bootGoldMat);
+                bootTrim.position.set(0, -0.22, 0.06);
+
+                legG.add(shin, boot, bootTrim);
+                group.add(legG);
+            });
+
+            // 3. Layered Royal Tunic & Batik Sarong Lower Body
+            const sarongMesh = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.54, 0.68, 0.65, 24),
+                pixarMat(0x78350f, 0.45)
+            );
+            sarongMesh.position.y = 0.68;
+            sarongMesh.castShadow = true;
+            group.add(sarongMesh);
+
+            // Upper Hero Torso Jacket
+            const torsoMesh = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.50, 0.56, 0.92, 24),
+                pixarMat(config.shirtColor, 0.3)
+            );
+            torsoMesh.position.y = 1.28;
+            torsoMesh.castShadow = true;
+            group.add(torsoMesh);
+
+            // Collar & Golden Buckle Belt
+            const beltMesh = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.57, 0.59, 0.2, 24),
+                pixarMat(0xd97706, 0.25, 0.5)
+            );
+            beltMesh.position.y = 0.95;
+            group.add(beltMesh);
+
+            const buckle = new THREE.Mesh(
+                new THREE.OctahedronGeometry(0.18, 0),
+                pixarMat(0xfde047, 0.15, 0.8, 0xb45309)
+            );
+            buckle.position.set(0, 0.96, 0.56);
+            buckle.scale.set(1.2, 1.0, 0.4);
+            group.add(buckle);
+
+            // Neck
+            const neckMesh = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.24, 0.28, 0.3, 16),
+                pixarMat(0xfdba74, 0.35)
+            );
+            neckMesh.position.y = 1.8;
+            group.add(neckMesh);
+
+            // 4. Heroic Cape / Detective Sash
+            let capeMesh = null;
+            if (config.role === 'gajahmada' || config.role === 'kisura') {
+                const capeColor = config.role === 'gajahmada' ? 0x991b1b : 0x1e1b4b;
+                capeMesh = new THREE.Mesh(
+                    new THREE.BoxGeometry(1.15, 1.45, 0.08),
+                    pixarMat(capeColor, 0.4)
+                );
+                capeMesh.position.set(0, 1.08, -0.48);
+                capeMesh.rotation.x = 0.18;
+                capeMesh.castShadow = true;
+                group.add(capeMesh);
+            } else {
+                // Cross-body Detective Sash for Arya & Ratna
+                const sash = new THREE.Mesh(
+                    new THREE.TorusGeometry(0.56, 0.08, 12, 24),
+                    pixarMat(0xfbbf24, 0.25, 0.5)
+                );
+                sash.position.set(0, 1.28, 0);
+                sash.rotation.y = Math.PI / 2;
+                sash.rotation.x = 0.55;
+                group.add(sash);
+            }
+
+            // Golden Shoulder Armor (Pauldrons) for Gajah Mada
+            if (config.role === 'gajahmada') {
+                [-0.62, 0.62].forEach(px => {
+                    const pauldron = new THREE.Mesh(
+                        new THREE.SphereGeometry(0.28, 16, 16),
+                        pixarMat(0xfacc15, 0.2, 0.75)
+                    );
+                    pauldron.position.set(px, 1.62, 0);
+                    pauldron.scale.set(1.2, 0.75, 1.1);
+                    group.add(pauldron);
+                });
+            }
+
+            // 5. Expressive Pixar Head with Ears, Eyebrows, Dual-Iris Eyes & Smile
+            const headGroup = new THREE.Group();
+            headGroup.position.y = 2.42;
+
+            const skinMat = pixarMat(0xffedd5, 0.28);
+            const headMesh = new THREE.Mesh(new THREE.SphereGeometry(0.74, 32, 32), skinMat);
+            headMesh.scale.set(1.05, 0.96, 1.0);
+            headMesh.castShadow = true;
+            headGroup.add(headMesh);
+
+            // Cute 3D Ears
+            [-0.75, 0.75].forEach((ex, i) => {
+                const ear = new THREE.Mesh(new THREE.SphereGeometry(0.18, 14, 14), skinMat);
+                ear.position.set(ex, 0.02, -0.05);
+                ear.scale.set(0.55, 1.1, 0.85);
+                headGroup.add(ear);
+
+                // Golden Ear Studs
+                const earring = new THREE.Mesh(
+                    new THREE.SphereGeometry(0.06, 10, 10),
+                    pixarMat(0xfacc15, 0.15, 0.8)
+                );
+                earring.position.set(ex * 1.02, -0.14, 0.02);
+                headGroup.add(earring);
+            });
+
+            // Rosy Pixar Cheeks & Sculpted Cute Nose
+            const cheekMat = pixarMat(0xfb7185, 0.4);
+            [-0.42, 0.42].forEach(cx => {
+                const cheek = new THREE.Mesh(new THREE.SphereGeometry(0.13, 12, 12), cheekMat);
+                cheek.position.set(cx, -0.08, 0.62);
+                cheek.scale.set(1.2, 0.75, 0.5);
+                headGroup.add(cheek);
+            });
+
+            const nose = new THREE.Mesh(new THREE.SphereGeometry(0.115, 16, 16), pixarMat(0xfdba74, 0.3));
+            nose.position.set(0, 0.02, 0.74);
+            headGroup.add(nose);
+
+            // Pixar Multi-Layered Glossy Eyes (Sclera + Colored Iris + Pupil + Dual Catchlights)
+            const eyeWhiteMat = pixarMat(0xffffff, 0.08);
+            const irisColor = config.role === 'kisura' ? 0x991b1b : (config.role === 'ratna' ? 0x047857 : 0x92400e);
+            const irisMat = pixarMat(irisColor, 0.15);
+            const pupilMat = pixarMat(0x090d16, 0.02);
+            const catchMat = pixarMat(0xffffff, 0.0, 0.0, 0xffffff);
+
+            const eyesGroup = new THREE.Group();
+            [-0.27, 0.27].forEach(ex => {
+                const sclera = new THREE.Mesh(new THREE.SphereGeometry(0.18, 20, 20), eyeWhiteMat);
+                sclera.position.set(ex, 0.12, 0.58);
+                sclera.scale.set(1.0, 1.18, 0.62);
+
+                const iris = new THREE.Mesh(new THREE.SphereGeometry(0.125, 16, 16), irisMat);
+                iris.position.set(ex, 0.12, 0.66);
+                iris.scale.set(1.0, 1.12, 0.55);
+
+                const pupil = new THREE.Mesh(new THREE.SphereGeometry(0.08, 14, 14), pupilMat);
+                pupil.position.set(ex, 0.12, 0.71);
+                pupil.scale.set(1.0, 1.1, 0.5);
+
+                const catchMain = new THREE.Mesh(new THREE.SphereGeometry(0.038, 10, 10), catchMat);
+                catchMain.position.set(ex + 0.045, 0.18, 0.76);
+
+                const catchSub = new THREE.Mesh(new THREE.SphereGeometry(0.02, 8, 8), catchMat);
+                catchSub.position.set(ex - 0.04, 0.07, 0.75);
+
+                eyesGroup.add(sclera, iris, pupil, catchMain, catchSub);
+            });
+            headGroup.add(eyesGroup);
+
+            // Expressive 3D Eyebrows
+            const browsGroup = new THREE.Group();
+            const browMat = pixarMat(0x1c1917, 0.4);
+            [-0.27, 0.27].forEach((bx, idx) => {
+                const brow = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.055, 0.06), browMat);
+                brow.position.set(bx, 0.36, 0.66);
+                if (config.role === 'kisura') {
+                    brow.rotation.z = idx === 0 ? -0.28 : 0.28; // Suspicious / Nervous tilt
+                } else if (config.role === 'gajahmada') {
+                    brow.rotation.z = idx === 0 ? -0.12 : 0.12; // Heroic determined brow
+                } else {
+                    brow.rotation.z = idx === 0 ? 0.08 : -0.08; // Friendly curious brow
+                }
+                browsGroup.add(brow);
+            });
+            headGroup.add(browsGroup);
+
+            // 3D Smile / Mustache
+            if (config.role === 'gajahmada') {
+                // Iconic Mighty Mustache for Senopati Gajah Mada
+                [-0.16, 0.16].forEach((mx, idx) => {
+                    const stache = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.075, 0.08), browMat);
+                    stache.position.set(mx, -0.14, 0.71);
+                    stache.rotation.z = idx === 0 ? 0.22 : -0.22;
+                    headGroup.add(stache);
+                });
+            }
+            const mouth = new THREE.Mesh(
+                new THREE.TorusGeometry(0.11, 0.03, 10, 18, Math.PI),
+                pixarMat(0x9f1239, 0.3)
+            );
+            mouth.position.set(0, -0.16, 0.68);
+            mouth.rotation.x = config.role === 'kisura' ? -0.2 : Math.PI; // Smile vs nervous O-mouth
+            headGroup.add(mouth);
+
+            // 6. Custom Pixar Headgear & Hairstyles per Character
+            if (config.hatType === 'senopati') {
+                // Garuda Golden Crown & Black Long Hair
+                const hairBack = new THREE.Mesh(new THREE.SphereGeometry(0.76, 20, 20), browMat);
+                hairBack.position.set(0, 0.05, -0.14);
+                headGroup.add(hairBack);
+
+                const helm = new THREE.Mesh(new THREE.CylinderGeometry(0.58, 0.75, 0.52, 24), pixarMat(0xd97706, 0.2, 0.7));
+                helm.position.y = 0.54;
+
+                // Garuda Side Wings on Helmet
+                [-0.68, 0.68].forEach((wx, idx) => {
+                    const wing = new THREE.Mesh(new THREE.ConeGeometry(0.22, 0.65, 8), pixarMat(0xfacc15, 0.15, 0.85));
+                    wing.position.set(wx, 0.65, 0);
+                    wing.rotation.z = idx === 0 ? 0.45 : -0.45;
+                    headGroup.add(wing);
+                });
+
+                const centerRuby = new THREE.Mesh(new THREE.OctahedronGeometry(0.16, 0), pixarMat(0xe11d48, 0.1, 0.3, 0x9f1239));
+                centerRuby.position.set(0, 0.56, 0.70);
+                const topCrest = new THREE.Mesh(new THREE.ConeGeometry(0.32, 0.65, 12), pixarMat(0xfde047, 0.15, 0.85));
+                topCrest.position.set(0, 0.95, 0.12);
+                headGroup.add(helm, centerRuby, topCrest);
+
+            } else if (config.hatType === 'blangkon') {
+                // Stylish Pixar Blangkon with Emerald Brooch & Side Hair Tuft
+                const blangkonBase = new THREE.Mesh(new THREE.CylinderGeometry(0.70, 0.75, 0.38, 24), pixarMat(0x78350f, 0.4));
+                blangkonBase.position.y = 0.48;
+                const blangkonFold = new THREE.Mesh(new THREE.SphereGeometry(0.68, 20, 16), pixarMat(0x92400e, 0.45));
+                blangkonFold.position.set(0, 0.58, -0.05);
+                blangkonFold.scale.set(1.0, 0.55, 1.0);
+
+                // Mondolan (Back bun of Blangkon)
+                const mondolan = new THREE.Mesh(new THREE.SphereGeometry(0.24, 14, 14), pixarMat(0x78350f, 0.4));
+                mondolan.position.set(0, 0.45, -0.75);
+
+                // Emerald Detective Pin on Front
+                const brooch = new THREE.Mesh(new THREE.OctahedronGeometry(0.14, 0), pixarMat(0x10b981, 0.1, 0.4, 0x065f46));
+                brooch.position.set(0, 0.50, 0.73);
+
+                headGroup.add(blangkonBase, blangkonFold, mondolan, brooch);
+
+            } else if (config.hatType === 'sanggul') {
+                // Glossy Black Hair + Royal Sanggul Bun + Golden Jasmine Flowers & Tiara
+                const hairMain = new THREE.Mesh(new THREE.SphereGeometry(0.77, 24, 24), browMat);
+                hairMain.position.set(0, 0.14, -0.10);
+
+                const bun = new THREE.Mesh(new THREE.SphereGeometry(0.38, 18, 18), browMat);
+                bun.position.set(0, 0.65, -0.42);
+
+                const tiara = new THREE.Mesh(new THREE.TorusGeometry(0.56, 0.06, 12, 24, Math.PI), pixarMat(0xfacc15, 0.15, 0.85));
+                tiara.position.set(0, 0.52, 0.18);
+                tiara.rotation.x = -1.1;
+
+                const hairpin = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.9, 8), pixarMat(0xfde047, 0.15, 0.85));
+                hairpin.position.set(0, 0.68, -0.42);
+                hairpin.rotation.z = 1.1;
+
+                headGroup.add(hairMain, bun, tiara, hairpin);
+
+            } else if (config.hatType === 'hood') {
+                // Mysterious Layered Cloak Hood with Gold Trim
+                const hoodOuter = new THREE.Mesh(new THREE.SphereGeometry(0.80, 24, 24), pixarMat(0x1e1b4b, 0.5));
+                hoodOuter.position.set(0, 0.14, -0.08);
+                const hoodPeak = new THREE.Mesh(new THREE.ConeGeometry(0.45, 0.55, 12), pixarMat(0x1e1b4b, 0.5));
+                hoodPeak.position.set(0, 0.78, -0.25);
+                hoodPeak.rotation.x = -0.4;
+                headGroup.add(hoodOuter, hoodPeak);
+            }
+
+            group.add(headGroup);
+
+            // 7. Articulated Arms & Iconic 3D Character Props!
+            const leftArmGroup = new THREE.Group();
+            leftArmGroup.position.set(-0.66, 1.55, 0);
+            const rightArmGroup = new THREE.Group();
+            rightArmGroup.position.set(0.66, 1.55, 0);
+
+            const sleeveMat = pixarMat(config.shirtColor, 0.35);
+            [leftArmGroup, rightArmGroup].forEach((armG, idx) => {
+                const isRight = idx === 1;
+                const upperArm = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.13, 0.52, 14), sleeveMat);
+                upperArm.position.set(isRight ? 0.12 : -0.12, -0.2, 0.1);
+                upperArm.rotation.z = isRight ? -0.35 : 0.35;
+                upperArm.rotation.x = -0.35;
+                upperArm.castShadow = true;
+
+                const hand = new THREE.Mesh(new THREE.SphereGeometry(0.18, 16, 16), skinMat);
+                hand.position.set(isRight ? 0.24 : -0.24, -0.42, 0.26);
+                hand.castShadow = true;
+
+                armG.add(upperArm, hand);
+                group.add(armG);
+            });
+
+            // 8. Attach Signature 3D Props to Right Hand!
+            const propGroup = new THREE.Group();
+            propGroup.position.set(0.26, -0.42, 0.36);
+
+            if (config.role === 'gajahmada') {
+                // Glowing Golden Keris Majapahit
+                const hilt = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.08, 0.28, 10), pixarMat(0x78350f, 0.4));
+                const guard = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.08, 0.12), pixarMat(0xfacc15, 0.2, 0.8));
+                guard.position.y = 0.14;
+                const blade = new THREE.Mesh(new THREE.ConeGeometry(0.09, 0.85, 6), pixarMat(0xfef08a, 0.1, 0.9, 0xd97706));
+                blade.position.y = 0.56;
+                propGroup.add(hilt, guard, blade);
+                propGroup.rotation.x = 0.45;
+
+            } else if (config.role === 'arya') {
+                // Giant Golden 3D Magnifying Glass (Loupe)
+                const handle = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.06, 0.45, 10), pixarMat(0x78350f, 0.4));
+                const rim = new THREE.Mesh(new THREE.TorusGeometry(0.28, 0.055, 12, 24), pixarMat(0xfacc15, 0.15, 0.85));
+                rim.position.y = 0.48;
+                const lens = new THREE.Mesh(
+                    new THREE.CylinderGeometry(0.26, 0.26, 0.04, 20),
+                    new THREE.MeshStandardMaterial({ color: 0xbae6fd, transparent: true, opacity: 0.65, roughness: 0.05 })
+                );
+                lens.rotation.x = Math.PI / 2;
+                lens.position.y = 0.48;
+                propGroup.add(handle, rim, lens);
+                propGroup.rotation.x = 0.35;
+                propGroup.rotation.z = -0.2;
+
+            } else if (config.role === 'ratna') {
+                // Glowing Crystal Majapahit Lantern & Lontar Scroll
+                const rod = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.5, 8), pixarMat(0xd97706, 0.3, 0.7));
+                const lanternCore = new THREE.Mesh(
+                    new THREE.OctahedronGeometry(0.24, 0),
+                    pixarMat(0xfef08a, 0.1, 0.2, 0xf59e0b)
+                );
+                lanternCore.position.y = 0.35;
+                const lanternCap = new THREE.Mesh(new THREE.ConeGeometry(0.26, 0.18, 6), pixarMat(0xb45309, 0.3, 0.6));
+                lanternCap.position.y = 0.55;
+                propGroup.add(rod, lanternCore, lanternCap);
+
+            } else if (config.role === 'kisura') {
+                // Secret Golden Coin Pouch
+                const pouch = new THREE.Mesh(new THREE.SphereGeometry(0.22, 14, 14), pixarMat(0xd97706, 0.4, 0.3));
+                pouch.position.y = 0.12;
+                const tie = new THREE.Mesh(new THREE.ConeGeometry(0.14, 0.18, 8), pixarMat(0xfacc15, 0.2, 0.6));
+                tie.position.y = 0.32;
+                propGroup.add(pouch, tie);
+            }
+
+            rightArmGroup.add(propGroup);
+
+            group.position.set(config.x, config.y || 0, config.z);
+            group.rotation.y = config.rotY || 0;
+
+            const charObj = {
+                group,
+                headGroup,
+                eyesGroup,
+                browsGroup,
+                leftArmGroup,
+                rightArmGroup,
+                leftLegGroup,
+                rightLegGroup,
+                propGroup,
+                capeMesh,
+                auraRing,
+                role: config.role || 'hero',
+                baseY: config.y || 0,
+                baseRotY: config.rotY || 0,
+                phase: Math.random() * Math.PI * 2,
+                spinTimer: 0
+            };
+            characters3D.push(charObj);
+            scene.add(group);
+            return charObj;
+        }
+
+        // ==================== POS 1 DIORAMA: BANGSAL PUSAKA ====================
+        function buildPos1Bangsal(cx, cz) {
+            const group = new THREE.Group();
+            group.position.set(cx, 0, cz);
+
+            // Terracotta Base Platform
+            const base = new THREE.Mesh(new THREE.BoxGeometry(8.5, 0.8, 6.5), pixarMat(0x9a3412, 0.5));
+            base.position.y = 0.4;
+            base.receiveShadow = true;
+            base.castShadow = true;
+            group.add(base);
+
+            // 4 Golden-Wood Pillars
+            [[-3.2, -2.2], [3.2, -2.2], [-3.2, 2.2], [3.2, 2.2]].forEach(([px, pz]) => {
+                const pillar = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.34, 4.2, 16), pixarMat(0xb45309, 0.4));
+                pillar.position.set(px, 2.6, pz);
+                pillar.castShadow = true;
+                group.add(pillar);
+            });
+
+            // Majapahit Joglo Layered Roof
+            const roof1 = new THREE.Mesh(new THREE.ConeGeometry(6.2, 2.2, 4), pixarMat(0xd97706, 0.45));
+            roof1.position.y = 5.4;
+            roof1.rotation.y = Math.PI / 4;
+            roof1.castShadow = true;
+            group.add(roof1);
+
+            // Open Royal Treasure Chest (Empty)
+            const chest = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.9, 1.1), pixarMat(0x78350f, 0.4));
+            chest.position.set(0, 1.25, -0.3);
+            const goldTrim = new THREE.Mesh(new THREE.BoxGeometry(1.56, 0.2, 1.16), pixarMat(0xfbbf24, 0.2, 0.6));
+            goldTrim.position.set(0, 1.6, -0.3);
+            group.add(chest, goldTrim);
+
+            // Clue 1: Floating Purple Silk Cloth near Window
+            purpleCloth3D = new THREE.Mesh(new THREE.BoxGeometry(0.85, 1.1, 0.12), pixarMat(0x9333ea, 0.3, 0.1, 0x3b0764));
+            purpleCloth3D.position.set(2.4, 2.3, 1.5);
+            purpleCloth3D.rotation.z = 0.25;
+            group.add(purpleCloth3D);
+
+            // Muddy Footprints on the floor
+            for (let i = 0; i < 4; i++) {
+                const print = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, 0.05, 12), pixarMat(0x451a03, 0.8));
+                print.position.set(0.6 + i * 0.7, 0.82, 0.6 + (i % 2) * 0.35);
+                group.add(print);
+            }
+
+            scene.add(group);
+
+            // Characters at Pos 1: Senopati Gajah Mada (with Keris) & Arya (with Magnifying Glass)
+            createPixarCharacter({ x: cx - 2.1, z: cz + 1.2, shirtColor: 0xb91c1c, hatType: 'senopati', role: 'gajahmada', auraColor: 0xfacc15, rotY: 0.35 });
+            createPixarCharacter({ x: cx + 1.6, z: cz + 1.5, shirtColor: 0x0284c7, hatType: 'blangkon', role: 'arya', auraColor: 0x38bdf8, rotY: -0.35 });
+        }
+
+        // ==================== POS 2 DIORAMA: PASAR BUBAT ====================
+        function buildPos2Pasar(cx, cz) {
+            const group = new THREE.Group();
+            group.position.set(cx, 0, cz);
+
+            // Market Stall Base
+            const platform = new THREE.Mesh(new THREE.BoxGeometry(8.2, 0.5, 6.0), pixarMat(0xb45309, 0.55));
+            platform.position.y = 0.25;
+            platform.receiveShadow = true;
+            group.add(platform);
+
+            // Colorful Pixar Awning Tent
+            const tentRoof = new THREE.Mesh(new THREE.ConeGeometry(5.5, 2.0, 4), pixarMat(0xe11d48, 0.4));
+            tentRoof.position.set(0, 4.6, 0);
+            tentRoof.rotation.y = Math.PI / 4;
+            tentRoof.castShadow = true;
+            group.add(tentRoof);
+
+            // Spice Baskets & Glowing Hidden Crown Parcel
+            [-1.5, 0, 1.5].forEach((bx, idx) => {
+                const basket = new THREE.Mesh(new THREE.CylinderGeometry(0.65, 0.5, 0.9, 16), pixarMat(0xd97706, 0.5));
+                basket.position.set(bx, 0.95, 0.2);
+                basket.castShadow = true;
+                group.add(basket);
+
+                if (idx === 1) {
+                    const shinyParcel = new THREE.Mesh(new THREE.SphereGeometry(0.45, 16, 16), pixarMat(0xfde047, 0.15, 0.8, 0xb45309));
+                    shinyParcel.position.set(bx, 1.55, 0.2);
+                    group.add(shinyParcel);
+                }
+            });
+
+            scene.add(group);
+
+            // Characters at Pos 2: Ratna (with Glowing Lantern) & Ki Sura (with Coin Pouch)
+            createPixarCharacter({ x: cx - 2.2, z: cz + 1.5, shirtColor: 0x10b981, hatType: 'sanggul', role: 'ratna', auraColor: 0x34d399, rotY: 0.4 });
+            createPixarCharacter({ x: cx + 2.0, z: cz + 0.8, shirtColor: 0x312e81, hatType: 'hood', role: 'kisura', auraColor: 0xa855f7, rotY: -0.45 });
+        }
+
+        // ==================== POS 3 DIORAMA: PENDOPO AGUNG ====================
+        function buildPos3Pendopo(cx, cz) {
+            const group = new THREE.Group();
+            group.position.set(cx, 0, cz);
+
+            const floor = new THREE.Mesh(new THREE.BoxGeometry(8.5, 0.7, 6.5), pixarMat(0x78350f, 0.5));
+            floor.position.y = 0.35;
+            floor.receiveShadow = true;
+            group.add(floor);
+
+            const roof = new THREE.Mesh(new THREE.ConeGeometry(6.2, 2.4, 4), pixarMat(0xb45309, 0.4));
+            roof.position.y = 5.3;
+            roof.rotation.y = Math.PI / 4;
+            roof.castShadow = true;
+            group.add(roof);
+
+            // Evidence Table with Pepper Basket & Muddy Wooden Shoes
+            const table = new THREE.Mesh(new THREE.BoxGeometry(2.8, 0.9, 1.4), pixarMat(0x92400e, 0.4));
+            table.position.set(0, 1.15, 0);
+            table.castShadow = true;
+            group.add(table);
+
+            const evidenceShoe = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.3, 0.35), pixarMat(0x451a03, 0.6));
+            evidenceShoe.position.set(-0.5, 1.75, 0);
+            const evidenceBasket = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.38, 0.6, 14), pixarMat(0xf59e0b, 0.4));
+            evidenceBasket.position.set(0.5, 1.9, 0);
+            group.add(evidenceShoe, evidenceBasket);
+
+            scene.add(group);
+
+            // Characters at Pos 3: Arya & Ki Sura at Interrogation Table
+            createPixarCharacter({ x: cx - 2.3, z: cz + 1.4, shirtColor: 0x0284c7, hatType: 'blangkon', role: 'arya', auraColor: 0x38bdf8, rotY: 0.4 });
+            createPixarCharacter({ x: cx + 2.3, z: cz + 1.4, shirtColor: 0x312e81, hatType: 'hood', role: 'kisura', auraColor: 0xa855f7, rotY: -0.4 });
+        }
+
+        // ==================== POS 4 DIORAMA: SINGGASANA & CANDI BENTAR ====================
+        function buildPos4Singgasana(cx, cz) {
+            const group = new THREE.Group();
+            group.position.set(cx, 0, cz);
+
+            // Grand Majapahit Candi Bentar Split Gate
+            [-3.2, 3.2].forEach((gx, idx) => {
+                for (let step = 0; step < 5; step++) {
+                    const block = new THREE.Mesh(
+                        new THREE.BoxGeometry(1.8 - step * 0.2, 1.1, 1.8 - step * 0.2),
+                        pixarMat(0xc2410c, 0.5)
+                    );
+                    block.position.set(gx, 0.6 + step * 1.0, -1.2);
+                    block.castShadow = true;
+                    group.add(block);
+                }
+            });
+
+            // Royal Golden Throne Pedestal
+            const pedestal = new THREE.Mesh(new THREE.CylinderGeometry(1.6, 2.1, 1.4, 24), pixarMat(0xb45309, 0.35, 0.3));
+            pedestal.position.set(0, 0.7, -0.2);
+            pedestal.castShadow = true;
+            group.add(pedestal);
+
+            // THE ROYAL MAJAPAHIT GOLDEN CROWN (3D Floating Centerpiece)
+            floatingCrown3D = new THREE.Group();
+            const crownBase = new THREE.Mesh(new THREE.CylinderGeometry(0.85, 0.7, 0.65, 24), pixarMat(0xfacc15, 0.15, 0.85, 0xca8a04));
+            floatingCrown3D.add(crownBase);
+
+            // Jewels around the Crown
+            const gemColors = [0xe11d48, 0x0284c7, 0x10b981, 0x9333ea];
+            for (let i = 0; i < 8; i++) {
+                const angle = (i / 8) * Math.PI * 2;
+                const spike = new THREE.Mesh(new THREE.ConeGeometry(0.22, 0.6, 8), pixarMat(0xfde047, 0.15, 0.9));
+                spike.position.set(Math.cos(angle) * 0.72, 0.55, Math.sin(angle) * 0.72);
+                floatingCrown3D.add(spike);
+
+                const gem = new THREE.Mesh(new THREE.SphereGeometry(0.14, 12, 12), pixarMat(gemColors[i % 4], 0.1, 0.3, gemColors[i % 4]));
+                gem.position.set(Math.cos(angle) * 0.78, 0.05, Math.sin(angle) * 0.78);
+                floatingCrown3D.add(gem);
+            }
+
+            floatingCrown3D.position.set(cx, 2.6, cz - 0.2);
+            scene.add(floatingCrown3D);
+            scene.add(group);
+
+            // Characters at Pos 4: Senopati Gajah Mada & Ratna celebrating around the Royal Crown
+            createPixarCharacter({ x: cx - 2.2, z: cz + 1.5, shirtColor: 0xb91c1c, hatType: 'senopati', role: 'gajahmada', auraColor: 0xfacc15, rotY: 0.35 });
+            createPixarCharacter({ x: cx + 2.2, z: cz + 1.5, shirtColor: 0x10b981, hatType: 'sanggul', role: 'ratna', auraColor: 0x34d399, rotY: -0.35 });
+        }
+
+        function buildMagicSparkles() {
+            const count = 90;
+            const geo = new THREE.BufferGeometry();
+            const positions = new Float32Array(count * 3);
+            for (let i = 0; i < count; i++) {
+                positions[i * 3] = (Math.random() - 0.5) * 52;
+                positions[i * 3 + 1] = Math.random() * 8 + 1;
+                positions[i * 3 + 2] = (Math.random() - 0.5) * 14;
+            }
+            geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            const mat = new THREE.PointsMaterial({ color: 0xfef08a, size: 0.28, transparent: true, opacity: 0.85 });
+            sparkles3D = new THREE.Points(geo, mat);
+            scene.add(sparkles3D);
+        }
+
+        // ==================== 3D INTERACTION & ANIMATION LOOP ====================
+        function setupStageInteractions(container) {
+            let downTime = 0;
+            container.addEventListener('mousedown', e => {
+                isDragging3D = true;
+                downTime = Date.now();
+                prevPointer = { x: e.clientX, y: e.clientY };
+            });
+            window.addEventListener('mouseup', e => {
+                if (isDragging3D && Date.now() - downTime < 220) {
+                    handleStageClick(e, container);
+                }
+                isDragging3D = false;
+            });
+            window.addEventListener('mousemove', e => {
+                if (!isDragging3D) return;
+                const dx = e.clientX - prevPointer.x;
+                const dy = e.clientY - prevPointer.y;
+                userOrbitAngleX = Math.max(-1.2, Math.min(1.2, userOrbitAngleX - dx * 0.006));
+                userOrbitAngleY = Math.max(-0.4, Math.min(0.6, userOrbitAngleY + dy * 0.005));
+                prevPointer = { x: e.clientX, y: e.clientY };
+            });
+
+            // Touch Support for Mobile/Interactive Flat Panels
+            container.addEventListener('touchstart', e => {
+                if (e.touches.length === 1) {
+                    isDragging3D = true;
+                    prevPointer = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+                }
+            }, { passive: true });
+            window.addEventListener('touchend', () => { isDragging3D = false; });
+            window.addEventListener('touchmove', e => {
+                if (!isDragging3D || e.touches.length !== 1) return;
+                const dx = e.touches[0].clientX - prevPointer.x;
+                const dy = e.touches[0].clientY - prevPointer.y;
+                userOrbitAngleX = Math.max(-1.2, Math.min(1.2, userOrbitAngleX - dx * 0.006));
+                userOrbitAngleY = Math.max(-0.4, Math.min(0.6, userOrbitAngleY + dy * 0.005));
+                prevPointer = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+            }, { passive: true });
+
+            // Mouse Wheel Zoom
+            container.addEventListener('wheel', e => {
+                e.preventDefault();
+                userZoomOffset = Math.max(-5.5, Math.min(6, userZoomOffset + e.deltaY * 0.005));
+            }, { passive: false });
+        }
+
+        // Click directly on any 3D Pixar Character to make them perform a Heroic Spin & Wave!
+        function handleStageClick(e, container) {
+            const rect = container.getBoundingClientRect();
+            mouseVec.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+            mouseVec.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+            raycaster.setFromCamera(mouseVec, camera);
+
+            const meshes = [];
+            characters3D.forEach(c => {
+                c.group.traverse(child => {
+                    if (child.isMesh) meshes.push(child);
+                });
+            });
+
+            const hits = raycaster.intersectObjects(meshes, false);
+            if (hits.length > 0) {
+                sfxSuccess();
+                jumpCelebrationTimer = 70;
+                characters3D.forEach(c => { c.spinTimer = 45; });
+            }
+        }
+
+        function resetCameraView() {
+            sfxClick();
+            userOrbitAngleX = 0;
+            userOrbitAngleY = 0;
+            userZoomOffset = 0;
+            isCharacterCloseup = false;
+            const txt = document.getElementById('closeup-text');
+            if (txt) txt.innerText = 'Zoom Karakter';
+        }
+
+        function triggerCharacterAction() {
+            sfxSuccess();
+            jumpCelebrationTimer = 85;
+            characters3D.forEach(c => { c.spinTimer = 50; });
+        }
+
+        function toggleCharacterCloseup() {
+            sfxClick();
+            isCharacterCloseup = !isCharacterCloseup;
+            const txt = document.getElementById('closeup-text');
+            if (isCharacterCloseup) {
+                userZoomOffset = -4.2;
+                userOrbitAngleY = -0.18;
+                if (txt) txt.innerText = 'Zoom Panggung';
+            } else {
+                userZoomOffset = 0;
+                userOrbitAngleY = 0;
+                if (txt) txt.innerText = 'Zoom Karakter';
+            }
+        }
+
+        function toggleDayNight() {
+            sfxClick();
+            isNightMode = !isNightMode;
+            if (isNightMode) {
+                scene.background = new THREE.Color(0x1e1b4b);
+                scene.fog.color.setHex(0x312e81);
+                hemiLight.intensity = 0.45;
+                dirLight.color.setHex(0x93c5fd);
+                dirLight.intensity = 0.85;
+            } else {
+                scene.background = new THREE.Color(0x7dd3fc);
+                scene.fog.color.setHex(0xfde68a);
+                hemiLight.intensity = 0.85;
+                dirLight.color.setHex(0xffedd5);
+                dirLight.intensity = 1.25;
+            }
+        }
+
+        function onResize3D() {
+            const container = document.getElementById('pixar-stage-wrapper');
+            if (!container || !renderer) return;
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        }
+
+        let clock = new THREE.Clock();
+        function animatePixar3D() {
+            requestAnimationFrame(animatePixar3D);
+            const t = clock.getElapsedTime();
+
+            // Smooth Camera Fly-To current Pos + User Orbit Offset
+            const target = posCameraTargets[currentPos];
+            const desiredCam = target.camPos.clone();
+            desiredCam.x += Math.sin(userOrbitAngleX) * 6;
+            desiredCam.y += userOrbitAngleY * 5;
+            desiredCam.z += userZoomOffset;
+
+            currentCamPos.lerp(desiredCam, 0.06);
+            currentLookAt.lerp(target.lookAt, 0.07);
+            camera.position.copy(currentCamPos);
+            camera.lookAt(currentLookAt);
+
+            // Animate Upgraded Hero Pixar Characters (Breathing, Eyebrows, Props, Cape & Heroic Jumps)
+            characters3D.forEach((c, idx) => {
+                const bounce = Math.abs(Math.sin(t * 2.8 + c.phase)) * 0.09;
+                let celebrateJump = 0;
+                if (jumpCelebrationTimer > 0) {
+                    celebrateJump = Math.abs(Math.sin(t * 13 + idx)) * 0.72;
+                }
+                c.group.position.y = c.baseY + bounce + celebrateJump;
+
+                // Spin 360 when clicked or triggered
+                if (c.spinTimer > 0) {
+                    c.spinTimer--;
+                    c.group.rotation.y = c.baseRotY + ((45 - c.spinTimer) / 45) * Math.PI * 2;
+                } else {
+                    c.group.rotation.y = c.baseRotY + Math.sin(t * 0.9 + c.phase) * 0.1;
+                }
+
+                // Head & Expressive Eyebrows animation
+                c.headGroup.rotation.z = Math.sin(t * 1.8 + c.phase) * 0.065;
+                c.headGroup.rotation.y = Math.cos(t * 1.3 + c.phase) * 0.14;
+                if (c.browsGroup) {
+                    c.browsGroup.position.y = Math.sin(t * 3.2 + c.phase) * 0.025 + (jumpCelebrationTimer > 0 ? 0.05 : 0);
+                }
+
+                // Articulated Arms & Signature 3D Prop Waving
+                c.leftArmGroup.rotation.z = Math.sin(t * 2.5 + c.phase) * 0.15;
+                c.rightArmGroup.rotation.x = Math.cos(t * 2.8 + c.phase) * 0.22 - (jumpCelebrationTimer > 0 ? 0.6 : 0);
+                if (c.propGroup) {
+                    c.propGroup.rotation.y = Math.sin(t * 3.5 + c.phase) * 0.35;
+                }
+
+                // Subtle Foot Tapping & Jumping Legs
+                c.leftLegGroup.rotation.x = Math.sin(t * 2.8 + c.phase) * 0.12;
+                c.rightLegGroup.rotation.x = -Math.sin(t * 2.8 + c.phase) * 0.12;
+
+                // Flowing Royal Cape & Pulsing Ground Aura Ring
+                if (c.capeMesh) {
+                    c.capeMesh.rotation.x = 0.18 + Math.sin(t * 4.2 + c.phase) * 0.12;
+                }
+                if (c.auraRing) {
+                    const s = 1.0 + Math.sin(t * 3 + c.phase) * 0.08;
+                    c.auraRing.scale.set(s, s, 1);
+                }
+
+                // Periodic Pixar Eye Blink
+                const blinkCycle = (t + idx * 0.7) % 4.0;
+                c.eyesGroup.scale.y = (blinkCycle > 3.85) ? 0.08 : 1.0;
+            });
+
+            if (jumpCelebrationTimer > 0) jumpCelebrationTimer--;
+
+            // Rotate & Float the Golden Majapahit Crown
+            if (floatingCrown3D) {
+                floatingCrown3D.rotation.y = t * 1.2;
+                floatingCrown3D.position.y = 2.65 + Math.sin(t * 2.5) * 0.25;
+            }
+
+            // Wave the Purple Silk Cloth Clue at Pos 1
+            if (purpleCloth3D) {
+                purpleCloth3D.rotation.z = 0.25 + Math.sin(t * 3.5) * 0.15;
+            }
+
+            // Drift Clouds
+            clouds3D.forEach((cloud, i) => {
+                cloud.position.x += 0.012 * ((i % 2) + 1);
+                if (cloud.position.x > 30) cloud.position.x = -30;
+            });
+
+            // Float Golden Sparkles
+            if (sparkles3D) {
+                sparkles3D.rotation.y = t * 0.05;
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        // ==================== WEB AUDIO SYNTHESIZER ====================
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        let audioCtx = null;
+
+        function playTone(freq, type = 'sine', duration = 0.15, delay = 0) {
+            if (!soundEnabled) return;
+            try {
+                if (!audioCtx) audioCtx = new AudioCtx();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime + delay);
+                gain.gain.setValueAtTime(0.12, audioCtx.currentTime + delay);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + delay + duration);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(audioCtx.currentTime + delay);
+                osc.stop(audioCtx.currentTime + delay + duration);
+            } catch (e) {}
+        }
+
+        function sfxClick() { playTone(520, 'triangle', 0.08); }
+        function sfxSuccess() {
+            playTone(523.25, 'sine', 0.12, 0);
+            playTone(659.25, 'sine', 0.12, 0.1);
+            playTone(783.99, 'sine', 0.15, 0.2);
+            playTone(1046.50, 'triangle', 0.3, 0.3);
+        }
+        function sfxWrong() {
+            playTone(240, 'sawtooth', 0.18, 0);
+            playTone(180, 'sawtooth', 0.25, 0.15);
+        }
+        function sfxVictory() {
+            [523.25, 659.25, 783.99, 1046.50, 783.99, 1046.50].forEach((f, idx) => {
+                playTone(f, 'triangle', 0.18, idx * 0.12);
+            });
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            document.getElementById('sound-btn').innerText = soundEnabled ? '🔊' : '🔇';
+            if (soundEnabled) sfxClick();
+        }
+
+        // ==================== TEXT TO SPEECH (NARATOR BAHASA INDONESIA) ====================
+        function speakNarrative() {
+            if (!('speechSynthesis' in window)) return;
+            const synth = window.speechSynthesis;
+            if (synth.speaking) {
+                synth.cancel();
+                document.getElementById('tts-icon').innerText = '🔊';
+                document.getElementById('tts-text').innerText = 'Bacakan Cerita';
+                return;
+            }
+            const m = missions[currentPos];
+            const utter = new SpeechSynthesisUtterance(m.plainNarrative);
+            utter.lang = 'id-ID';
+            utter.rate = 0.95;
+            utter.onstart = () => {
+                document.getElementById('tts-icon').innerText = '⏹️';
+                document.getElementById('tts-text').innerText = 'Hentikan Suara';
+            };
+            utter.onend = () => {
+                document.getElementById('tts-icon').innerText = '🔊';
+                document.getElementById('tts-text').innerText = 'Bacakan Cerita';
+            };
+            synth.speak(utter);
+        }
+
+        function stopSpeech() {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const icon = document.getElementById('tts-icon');
+                const txt = document.getElementById('tts-text');
+                if (icon && txt) {
+                    icon.innerText = '🔊';
+                    txt.innerText = 'Bacakan Cerita';
+                }
+            }
+        }
+
+        function changeFontSize(delta) {
+            sfxClick();
+            fontScale = Math.max(-1, Math.min(2, fontScale + delta));
+            const storyEl = document.getElementById('story-text');
+            const sizes = ['text-base', 'text-lg sm:text-xl', 'text-xl sm:text-2xl', 'text-2xl sm:text-3xl'];
+            storyEl.className = `${sizes[fontScale + 1]} leading-relaxed text-amber-950 font-medium text-justify transition-all`;
+        }
+
+        // ==================== RENDER GAMEPLAY ====================
+        function initGame() {
+            renderMission();
+            renderTeacherGuide();
+            updateMapUI();
+            updateHUD();
+        }
+
+        function renderMission() {
+            stopSpeech();
+            userOrbitAngleX = 0;
+            userOrbitAngleY = 0;
+            const m = missions[currentPos];
+
+            document.getElementById('stage-pos-badge').innerText = `POS ${m.pos} / 4`;
+            document.getElementById('stage-location-title').innerText = m.stageTitle;
+            document.getElementById('speaker-name').innerText = m.speaker;
+            document.getElementById('pos-badge').innerText = `POS MISI ${m.pos} DARI 4`;
+            document.getElementById('pos-title').innerText = m.title;
+            document.getElementById('pos-skill').innerText = m.skill;
+            document.getElementById('location-tag').innerText = m.location;
+            document.getElementById('scene-avatar').innerText = m.avatar;
+            document.getElementById('pos-character-quote').innerText = `"${m.quote}"`;
+            document.getElementById('story-text').innerHTML = m.narrative;
+            document.getElementById('question-text').innerText = m.question;
+
+            const preHint = document.getElementById('pre-hint-box');
+            preHint.classList.add('hidden');
+            preHint.innerHTML = `<strong>💡 Petunjuk Membaca:</strong> ${m.hint}`;
+            document.getElementById('feedback-box').classList.add('hidden');
+
+            const optContainer = document.getElementById('options-container');
+            optContainer.innerHTML = '';
+
+            const badgeColors = {
+                'A': 'bg-rose-600 text-white border-rose-950',
+                'B': 'bg-sky-600 text-white border-sky-950',
+                'C': 'bg-amber-400 text-amber-950 border-amber-950',
+                'D': 'bg-emerald-600 text-white border-emerald-950'
+            };
+
+            m.options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.id = `opt-${opt.label}`;
+                btn.onclick = () => checkAnswer(opt.label);
+                btn.className = `opt-btn text-left p-4 sm:p-5 rounded-2xl bg-white hover:bg-amber-100/90 border-4 border-amber-900 flex items-start gap-4 btn-3d transition group`;
+                btn.innerHTML = `
+                    <span class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl ${badgeColors[opt.label]} border-2 font-game font-bold text-lg sm:text-xl flex items-center justify-center shrink-0 shadow group-hover:scale-105 transition">
+                        ${opt.label}
+                    </span>
+                    <span class="text-sm sm:text-base font-bold text-amber-950 leading-snug pt-0.5">
+                        ${opt.text}
+                    </span>
+                `;
+                optContainer.appendChild(btn);
+            });
+
+            updateMapUI();
+        }
+
+        function showPreHint() {
+            sfxClick();
+            document.getElementById('pre-hint-box').classList.toggle('hidden');
+        }
+
+        function checkAnswer(selectedLabel) {
+            const m = missions[currentPos];
+            const fbBox = document.getElementById('feedback-box');
+            const fbIcon = document.getElementById('feedback-icon');
+            const fbTitle = document.getElementById('feedback-title');
+            const fbExp = document.getElementById('feedback-explanation');
+            const rewardBadge = document.getElementById('artifact-reward-badge');
+            const nextBtn = document.getElementById('next-btn');
+            const retryBtn = document.getElementById('retry-btn');
+
+            document.querySelectorAll('.opt-btn').forEach(b => {
+                b.disabled = true;
+                b.classList.add('opacity-60', 'cursor-not-allowed');
+            });
+
+            const chosenBtn = document.getElementById(`opt-${selectedLabel}`);
+            chosenBtn.classList.remove('opacity-60');
+
+            fbBox.classList.remove('hidden', 'bg-emerald-100', 'border-emerald-800', 'bg-rose-100', 'border-rose-800');
+
+            if (selectedLabel === m.correct) {
+                sfxSuccess();
+                jumpCelebrationTimer = 95; // Make 3D Pixar characters jump with joy!
+                chosenBtn.classList.replace('bg-white', 'bg-emerald-200');
+                chosenBtn.classList.replace('border-amber-900', 'border-emerald-800');
+
+                fbBox.classList.add('bg-emerald-100', 'border-emerald-800');
+                fbIcon.innerText = '🎉';
+                fbTitle.innerText = `Luar Biasa! Jawaban (${selectedLabel}) Tepat!`;
+                fbTitle.className = 'font-game text-xl sm:text-2xl font-bold text-emerald-950';
+                fbExp.innerHTML = `<span class="text-emerald-950"><strong>3. Kunci Jawaban & Pembahasan Singkat:</strong> ${m.explanation}</span>`;
+
+                if (!completedPos[currentPos]) {
+                    score += 100;
+                    completedPos[currentPos] = true;
+                    rewardBadge.innerText = `+100 XP & Bukti "${m.artifactName}" Ditemukan!`;
+                    rewardBadge.classList.remove('hidden');
+                    updateHUD();
+                } else {
+                    rewardBadge.classList.add('hidden');
+                }
+
+                retryBtn.classList.add('hidden');
+                nextBtn.classList.remove('hidden');
+                nextBtn.innerHTML = currentPos < 3
+                    ? `<span>Terbang ke Pos Misi ${currentPos + 2}</span> <span>➔</span>`
+                    : `<span>Kembalikan Mahkota ke Singgasana 3D!</span> <span>👑</span>`;
+            } else {
+                sfxWrong();
+                chosenBtn.classList.replace('bg-white', 'bg-rose-200');
+                chosenBtn.classList.replace('border-amber-900', 'border-rose-800');
+
+                fbBox.classList.add('bg-rose-100', 'border-rose-800');
+                fbIcon.innerText = '🧐';
+                fbTitle.innerText = `Hmm, Jawaban (${selectedLabel}) Belum Tepat!`;
+                fbTitle.className = 'font-game text-xl sm:text-2xl font-bold text-rose-950';
+                fbExp.innerHTML = `<span class="text-rose-950"><strong>Petunjuk Detektif (Clue):</strong> ${m.hint}</span>`;
+                rewardBadge.classList.add('hidden');
+
+                if (lives > 1) lives--;
+                updateHUD();
+
+                nextBtn.classList.add('hidden');
+                retryBtn.classList.remove('hidden');
+            }
+
+            updateMapUI();
+            fbBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function retryQuestion() {
+            sfxClick();
+            document.getElementById('feedback-box').classList.add('hidden');
+            document.querySelectorAll('.opt-btn').forEach(b => {
+                b.disabled = false;
+                b.classList.remove('opacity-60', 'cursor-not-allowed', 'bg-rose-200', 'border-rose-800');
+                b.classList.add('bg-white', 'border-amber-900');
+            });
+        }
+
+        function nextMission() {
+            sfxClick();
+            stopTimer();
+            if (currentPos < 3) {
+                currentPos++;
+                renderMission();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+                sfxVictory();
+                jumpCelebrationTimer = 180;
+                launchConfetti();
+                document.getElementById('mission-card').classList.add('hidden');
+                const vic = document.getElementById('victory-screen');
+                vic.classList.remove('hidden');
+                document.getElementById('final-score').innerText = `${score} XP`;
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        function jumpToPos(index) {
+            sfxClick();
+            document.getElementById('victory-screen').classList.add('hidden');
+            document.getElementById('mission-card').classList.remove('hidden');
+            currentPos = index;
+            renderMission();
+        }
+
+        function updateHUD() {
+            document.getElementById('score-display').innerText = score;
+            document.getElementById('lives-display').innerText = '❤️'.repeat(lives) + '🖤'.repeat(3 - lives);
+
+            let count = 0;
+            for (let i = 0; i < 4; i++) {
+                const slot = document.getElementById(`artifact-${i}`);
+                if (completedPos[i]) {
+                    count++;
+                    slot.classList.remove('opacity-40', 'border-amber-700/60');
+                    slot.classList.add('opacity-100', 'border-amber-400', 'bg-amber-800/90', 'scale-105', 'shadow-lg');
+                } else {
+                    slot.classList.add('opacity-40', 'border-amber-700/60');
+                    slot.classList.remove('opacity-100', 'border-amber-400', 'bg-amber-800/90', 'scale-105', 'shadow-lg');
+                }
+            }
+            document.getElementById('clue-counter').innerText = `${count}/4 Bukti`;
+        }
+
+        function updateMapUI() {
+            const perc = (currentPos / 3) * 82;
+            document.getElementById('progress-bar').style.width = `${perc}%`;
+
+            for (let i = 0; i < 4; i++) {
+                const node = document.getElementById(`node-${i}`);
+                const box = node.querySelector('.node-box');
+                const label = node.querySelector('.node-label');
+                const camBtn = document.getElementById(`cam-pos-${i}`);
+
+                box.classList.remove('pos-active-glow');
+
+                if (i === currentPos) {
+                    box.className = 'node-box w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br from-amber-300 to-amber-500 border-4 border-amber-950 flex items-center justify-center text-xl sm:text-2xl shadow-xl pos-active-glow scale-110 transition-all';
+                    label.className = 'node-label mt-1 text-xs font-game font-bold bg-amber-950 text-amber-200 px-2 py-0.5 rounded-lg shadow';
+                    if (camBtn) camBtn.className = 'px-2.5 py-1 rounded-xl font-game font-bold text-xs bg-amber-400 text-amber-950 shadow transition';
+                } else if (completedPos[i]) {
+                    box.className = 'node-box w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br from-emerald-400 to-emerald-600 border-4 border-emerald-950 flex items-center justify-center text-xl sm:text-2xl shadow-md transition-all';
+                    label.className = 'node-label mt-1 text-xs font-game font-bold bg-emerald-900 text-emerald-100 px-2 py-0.5 rounded-lg shadow';
+                    if (camBtn) camBtn.className = 'px-2.5 py-1 rounded-xl font-game font-bold text-xs bg-emerald-600 text-white transition';
+                } else {
+                    box.className = 'node-box w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-amber-100 border-4 border-amber-800/60 flex items-center justify-center text-xl sm:text-2xl shadow opacity-75 hover:opacity-100 transition-all';
+                    label.className = 'node-label mt-1 text-xs font-game font-bold bg-amber-800/70 text-amber-100 px-2 py-0.5 rounded-lg';
+                    if (camBtn) camBtn.className = 'px-2.5 py-1 rounded-xl font-game font-bold text-xs text-amber-200 hover:bg-white/10 transition';
+                }
+            }
+        }
+
+        // ==================== SKOR KELOMPOK & TIMER ====================
+        function addTeamScore(teamIdx) {
+            sfxClick();
+            teamScores[teamIdx] += 100;
+            document.getElementById(`team-score-${teamIdx}`).innerText = teamScores[teamIdx];
+        }
+
+        function resetTeams() {
+            sfxClick();
+            teamScores = [0, 0, 0, 0];
+            for (let i = 0; i < 4; i++) {
+                document.getElementById(`team-score-${i}`).innerText = 0;
+            }
+        }
+
+        function resetGame() {
+            sfxClick();
+            currentPos = 0;
+            score = 0;
+            lives = 3;
+            completedPos = [false, false, false, false];
+            updateHUD();
+            document.getElementById('victory-screen').classList.add('hidden');
+            document.getElementById('mission-card').classList.remove('hidden');
+            renderMission();
+        }
+
+        function toggleTimer() {
+            sfxClick();
+            if (timerInterval) {
+                stopTimer();
+            } else {
+                timeLeft = 120;
+                updateTimerText();
+                timerInterval = setInterval(() => {
+                    timeLeft--;
+                    updateTimerText();
+                    if (timeLeft <= 0) {
+                        stopTimer();
+                        sfxVictory();
+                        document.getElementById('timer-display').innerText = "⏰ Waktu Diskusi Habis!";
+                    }
+                }, 1000);
+            }
+        }
+
+        function stopTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+            document.getElementById('timer-display').innerText = "Timer Diskusi (02:00)";
+        }
+
+        function updateTimerText() {
+            const m = String(Math.floor(timeLeft / 60)).padStart(2, '0');
+            const s = String(timeLeft % 60).padStart(2, '0');
+            document.getElementById('timer-display').innerText = `Sisa Diskusi: ${m}:${s} (Reset)`;
+        }
+
+        function toggleMode() {
+            sfxClick();
+            stopSpeech();
+            isTeacherMode = !isTeacherMode;
+            const gameView = document.getElementById('game-view');
+            const teacherView = document.getElementById('teacher-view');
+            const btnText = document.getElementById('mode-btn-text');
+            const btnIcon = document.getElementById('mode-icon');
+
+            if (isTeacherMode) {
+                gameView.classList.add('hidden');
+                teacherView.classList.remove('hidden');
+                btnIcon.innerText = "🎮";
+                btnText.innerText = "Layar Game 3D";
+            } else {
+                teacherView.classList.add('hidden');
+                gameView.classList.remove('hidden');
+                btnIcon.innerText = "📋";
+                btnText.innerText = "Panduan & Kunci Guru";
+                setTimeout(onResize3D, 50);
+            }
+        }
+
+        function renderTeacherGuide() {
+            const container = document.getElementById('teacher-content-list');
+            container.innerHTML = missions.map(m => `
+                <div class="bg-[#fffdf7] border-2 border-amber-500 rounded-3xl p-6 shadow-sm">
+                    <div class="flex flex-wrap justify-between items-center gap-2 border-b-2 border-amber-200 pb-3 mb-4">
+                        <div class="flex items-center gap-3">
+                            <span class="text-3xl">${m.avatar}</span>
+                            <div>
+                                <h3 class="text-xl font-bold text-amber-950">
+                                    Pos Misi ${m.pos}: ${m.title}
+                                </h3>
+                                <span class="text-xs font-bold text-amber-700">${m.location}</span>
+                            </div>
+                        </div>
+                        <span class="text-xs font-extrabold bg-amber-200 text-amber-950 px-3 py-1 rounded-full border border-amber-500">
+                            ${m.skill}
+                        </span>
+                    </div>
+
+                    <div class="mb-4">
+                        <div class="text-xs font-extrabold uppercase text-amber-800 mb-1.5">1. Narasi Cerita (1 Paragraf Penuh):</div>
+                        <p class="text-sm sm:text-base text-amber-950 bg-amber-50/70 p-4 rounded-2xl border border-amber-300 leading-relaxed text-justify">
+                            ${m.narrative}
+                        </p>
+                    </div>
+
+                    <div class="mb-4">
+                        <div class="text-xs font-extrabold uppercase text-amber-800 mb-1.5">2. Tantangan Misi (Pilihan Ganda A, B, C, D):</div>
+                        <p class="font-bold text-amber-950 mb-2.5">${m.question}</p>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm sm:text-base">
+                            ${m.options.map(o => `
+                                <div class="${o.label === m.correct ? 'font-bold text-emerald-950 bg-emerald-100 px-3.5 py-2 rounded-xl border-2 border-emerald-600' : 'text-amber-900 bg-white px-3.5 py-2 rounded-xl border border-amber-200'}">
+                                    <strong>${o.label}.</strong> ${o.text} ${o.label === m.correct ? '✅ (Kunci)' : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <div class="bg-amber-100/80 border-2 border-amber-400 rounded-2xl p-4 text-sm sm:text-base">
+                        <span class="font-extrabold text-amber-950">3. Kunci Jawaban & Pembahasan Singkat (Jawaban: ${m.correct}):</span>
+                        <p class="text-amber-950 mt-1 leading-relaxed">${m.explanation}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // ==================== CONFETTI VICTORY EFFECT ====================
+        function launchConfetti() {
+            const canvas = document.getElementById('confetti-canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const pieces = Array.from({ length: 90 }, () => ({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height - canvas.height,
+                w: Math.random() * 10 + 6,
+                h: Math.random() * 6 + 4,
+                color: ['#fbbf24', '#10b981', '#f43f5e', '#38bdf8', '#a855f7'][Math.floor(Math.random() * 5)],
+                vy: Math.random() * 3 + 2,
+                vx: Math.random() * 2 - 1,
+                angle: Math.random() * 360
+            }));
+
+            let frames = 0;
+            function draw() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                pieces.forEach(p => {
+                    p.y += p.vy;
+                    p.x += p.vx;
+                    p.angle += 4;
+                    ctx.save();
+                    ctx.translate(p.x, p.y);
+                    ctx.rotate((p.angle * Math.PI) / 180);
+                    ctx.fillStyle = p.color;
+                    ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+                    ctx.restore();
+                });
+                frames++;
+                if (frames < 180) requestAnimationFrame(draw);
+                else ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
+            draw();
+        }
+
+        // Start 3D Pixar World & Game on Window Load
+        window.onload = function () {
+            initPixar3DWorld();
+            initGame();
+            animatePixar3D();
+        };
+    </script>
+</body>
+</html>
